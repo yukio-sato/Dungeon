@@ -2,32 +2,19 @@
 double hp, atk;
 bool derrotado;
 int stage = 1;
-    var enemy=(
-    monster="",
-    hp=0,
-    atk=0,
-    derrotado = false
-    );
+var enemy=(monster="",hp=0,atk=0, derrotado = false);
 void updt()
 {
 switch (stage)
 {
     case 1:
-    enemy=(
-    monster="Lobo Mau",
-    hp=5,
-    atk=0,
-    derrotado = false
-    );
+    enemy=(monster="Lobo Mau",hp=5,atk=0,derrotado = false);
     break;
+
     case 2:
-    enemy=(
-    monster="Lobo Bom",
-    hp=1,
-    atk=0,
-    derrotado = false
-    );
+    enemy=(monster="Lobo Bom",hp=1,atk=0,derrotado = false);
     break;
+
     default:
     break;
 }
@@ -38,10 +25,12 @@ Console.WriteLine("Atacar ou Defender?");
 acao = Console.ReadLine()!;
 if (acao.Trim().ToLower().Substring(0,1) == "a")
 {
-    Console.WriteLine("Atacou!");
     if (hp > 0)
     {
     hp -= 1;
+        Console.WriteLine("Atacou!");
+        Console.WriteLine("Pressione qualquer tecla para continuar. . .");
+        Console.ReadKey();
     }
     if (hp <= 0 && derrotado == false)
     {
