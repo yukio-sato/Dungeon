@@ -1,4 +1,5 @@
-﻿string monster, acao;
+﻿
+string monster, acao;
 double hp, atk;
 bool derrotado;
 int stage = 1;
