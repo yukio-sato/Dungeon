@@ -63,7 +63,7 @@ void loaded()
 }
 Console.ForegroundColor = ConsoleColor.Gray;
 frase("✎ Digite o nome: ",25);
-you = Console.ReadLine()!;
+you = Console.ReadLine()!.Trim();
 player_at = dice(1,6,6);
 Console.ForegroundColor = ConsoleColor.Red;
 frase($"⟨➶  AT: {player_at}",25);
@@ -80,11 +80,11 @@ void updt()
 switch (stage)
 {
     case 1:
-    enemy=(monster="Lobo Mau",hp=20,atk=1,derrotado = false);
+    enemy=(monster="Lobo Mau",hp=4,atk=5,derrotado = false);
     break;
 
     case 2:
-    enemy=(monster="Lobo Bom",hp=20,atk=2,derrotado = false);
+    enemy=(monster="Lobo Bom",hp=20,atk=10,derrotado = false);
     break;
 
     default:
@@ -108,11 +108,26 @@ if (acao.Trim().ToLower().Substring(0,1) == "a")
 {
     if (hp > 0)
     {
-        player_hp = player_hp - atk;
-        hp = hp - player_at;
-        Console.ForegroundColor = ConsoleColor.Red;
-        frase("➹ Atacou!\n",25);
-        Thread.Sleep(55);
+        int atk_test = player_at + dice(2,6,0);
+        int enemy_def = enemy.Item3 + dice(2,6,0);
+        if (atk_test > enemy_def)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            hp = hp - 2;
+            frase("➹ Acertou o Ataque!\n",25);
+        }
+        else if (atk_test < enemy_def)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            player_hp = player_hp - 2;
+            frase("➹ O inimigo contra-ataca!\n",25);
+        }
+        else if (atk_test == enemy_def)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            frase("➹ Ambos erram o Ataque!\n",25);
+        }
+        Thread.Sleep(75);
     }
     if (player_hp <= 0 && player_derrotado == false)
     {
@@ -141,7 +156,7 @@ if (acao.Trim().ToLower().Substring(0,1) == "a")
         }
     }
 }
-if (acao.Trim().ToLower().Substring(0,1) == "d")
+else if (acao.Trim().ToLower().Substring(0,1) == "d")
 {
     if (hp > 0)
     {
