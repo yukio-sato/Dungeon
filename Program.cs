@@ -1,7 +1,21 @@
-﻿string monster, acao, you, hpbar = "";
-bool derrotado, player_derrotado = false;
-int stage = 1, rolagem = 1, result, hp, atk, player_hp, player_Maxhp, player_at,player_lu;
-var enemy=(monster="",hp=0,atk=0, derrotado = false);
+﻿string 
+monster, // monster name 
+acao, // type of action choosed 
+you, // player name 
+hpbar = "", // visual hp bar string
+luck_mode = ""; // luck status (now)
+
+bool derrotado, // monster defeat
+player_derrotado = false; // player defeat
+
+int stage = 1, finalStage = 3, // stage settings
+rolagem = 1, result, // dice placeholder
+hp, atk, // monster stats (now)
+player_hp, player_Maxhp, player_at, player_lu, // player stats
+luck_Test, atk_Test, def_Test, // player/enemy tests
+atk_dmg = 0, def_dmg = 0; // damage player/enemy for atk and def;
+var enemy=(monster="",hp=0,atk=0, derrotado = false); // where set the above var
+
 void frase(string txt, int cooldown)
 {
     for (int i = 0; i < txt.Length; i++)
@@ -26,33 +40,32 @@ int dice(int quantity,int maximo, int bns)
     }
     return (result+bns);
 }
-string bar()
+void bar(int now, int max)
 {
-    if (hp >= enemy.Item2)
+    if (now >= max)
     {
         hpbar = "♥♥♥♥♥";
     }
-    else if (hp <= enemy.Item2-(enemy.Item2*0.2) && hp > enemy.Item2-(enemy.Item2*0.4))
+    else if (now <= max-(max*0.2) && now > max-(max*0.4))
     {
         hpbar = "♥♥♥♥♡";
     }
-    else if (hp <= enemy.Item2-(enemy.Item2*0.4) && hp > enemy.Item2-(enemy.Item2*0.6))
+    else if (now <= max-(max*0.4) && now > max-(max*0.6))
     {
         hpbar = "♥♥♥♡♡";
     }
-    else if (hp <= enemy.Item2-(enemy.Item2*0.6) && hp > enemy.Item2-(enemy.Item2*0.8))
+    else if (now <= max-(max*0.6) && now > max-(max*0.8))
     {
         hpbar = "♥♥♡♡♡";
     }
-    else if (hp <= enemy.Item2-(enemy.Item2*0.8) && hp > 1)
+    else if (now <= max-(max*0.8) && now > 0)
     {
         hpbar = "♥♡♡♡♡";
     }
-    else if (hp <= 0)
+    else if (now <= 0)
     {
         hpbar = "♡♡♡♡♡";
     }
-    return hpbar;
 }
 void loaded()
 {
@@ -82,53 +95,18 @@ switch (stage)
     case 1:
     enemy=(monster="Lobo Mau",hp=4,atk=5,derrotado = false);
     break;
-
     case 2:
-    enemy=(monster="Lobo Bom",hp=20,atk=10,derrotado = false);
+    enemy=(monster="Lobo Bom",hp=10,atk=7,derrotado = false);
     break;
-
+    case 3:
+    enemy=(monster="Sans",hp=1,atk=666,derrotado = false);
+    break;
     default:
     break;
 }
 }
-void loop()
+void morte()
 {
-Console.ForegroundColor = ConsoleColor.White;
-frase("╔─── Ações ──────────────╗\n",0);
-Console.ForegroundColor = ConsoleColor.Red;
-frase("│ Ⓐ tacar                │\n",25);
-Console.ForegroundColor = ConsoleColor.DarkGray;
-frase("│ Ⓓ efender              │\n",25);
-Console.ForegroundColor = ConsoleColor.DarkGreen;
-frase("│ Ⓢ orte                 │\n",25);
-Console.ForegroundColor = ConsoleColor.White;
-frase("╚────────────────────────╝\n",0);
-acao = Console.ReadLine()!;
-if (acao.Trim().ToLower().Substring(0,1) == "a")
-{
-    if (hp > 0)
-    {
-        int atk_test = player_at + dice(2,6,0);
-        int enemy_def = enemy.Item3 + dice(2,6,0);
-        if (atk_test > enemy_def)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            hp = hp - 2;
-            frase("➹ Acertou o Ataque!\n",25);
-        }
-        else if (atk_test < enemy_def)
-        {
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            player_hp = player_hp - 2;
-            frase("➹ O inimigo contra-ataca!\n",25);
-        }
-        else if (atk_test == enemy_def)
-        {
-            Console.ForegroundColor = ConsoleColor.Gray;
-            frase("➹ Ambos erram o Ataque!\n",25);
-        }
-        Thread.Sleep(75);
-    }
     if (player_hp <= 0 && player_derrotado == false)
     {
         player_hp = 0;
@@ -143,44 +121,154 @@ if (acao.Trim().ToLower().Substring(0,1) == "a")
         derrotado = true;
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine($"{monster} HP {bar()} {hp}/{enemy.Item2} AT {atk}➶");
+        bar(hp,enemy.Item2);
+        Console.WriteLine($"{monster} HP {hpbar} {hp}/{enemy.Item2} AT {atk}➶");
         Console.ForegroundColor = ConsoleColor.Red;
         frase($"✝ {monster} foi derrotado! ✝\n", 25);
-        loaded();
-        if (stage >= 2)
+        if (stage >= finalStage)
         {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Clear();
-        frase("❚ ❚ Fim da Demo! ❚ ❚",25);
+        frase("❚ ❚ Fim da Demo! ❚ ❚\n",25);
         Console.ResetColor();
         }
+    }
+}
+void status_math()
+{
+    if (luck_mode == "")
+    {
+        atk_dmg = 2;
+        def_dmg = 2;
+    }
+    else if (luck_mode == "lucky")
+    {
+        atk_dmg = 4;
+        def_dmg = 1;
+    }
+    else if (luck_mode == "unlucky")
+    {
+        atk_dmg = 1;
+        def_dmg = 3;
+    }
+}
+void loop()
+{
+Console.ForegroundColor = ConsoleColor.White;
+frase("╔─── Ações ──────────────╗\n",0);
+Console.ForegroundColor = ConsoleColor.Red;
+frase("│ Ⓐ tacar                │\n",25);
+Console.ForegroundColor = ConsoleColor.DarkGray;
+frase("│ Ⓓ efender              │\n",25);
+Console.ForegroundColor = ConsoleColor.DarkGreen;
+frase("│ Ⓢ orte                 │\n",25);
+Console.ForegroundColor = ConsoleColor.White;
+frase("╚────────────────────────╝\n",0);
+acao = Console.ReadLine()!;
+if (acao.Trim() == "")
+{
+    acao = ".";
+}
+if (acao.Trim().ToLower().Substring(0,1) == "s")
+{
+    if (hp > 0 && luck_mode == "")
+    {
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        frase($"✤ {you} testou a Sorte!\n",25);
+        luck_Test = dice(2,6,0);
+        if (luck_Test <= player_lu)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            frase("Sortudo\n",50);
+            luck_mode = "lucky";
+            loaded();
+        }
+        else if (luck_Test > player_lu)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            frase("Azarado\n",50);
+            luck_mode = "unlucky";
+            loaded();
+        }
+    }
+    else if (hp > 0 && luck_mode != "")
+    {
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        frase("Você já testou sua Sorte!\n",37);
+        loaded();
+    }
+}
+
+if (acao.Trim().ToLower().Substring(0,1) == "a")
+{
+    if (hp > 0)
+    {
+        status_math();
+        luck_mode = "";
+        atk_Test = player_at + dice(2,6,0);
+        def_Test = enemy.Item3 + dice(2,6,0);
+        if (atk_Test > def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            hp = hp - atk_dmg;
+            frase($"➹ {you} Acertou!\n",25);
+        }
+        else if (atk_Test < def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            player_hp = player_hp - def_dmg;
+            frase($"➹ {monster} contra-ataca!\n",25);
+        }
+        else if (atk_Test == def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            frase("➹ Ambos erram o Ataque!\n",25);
+        }
+        morte();
+        loaded();
     }
 }
 else if (acao.Trim().ToLower().Substring(0,1) == "d")
 {
     if (hp > 0)
     {
-        player_hp = player_hp - atk;
-        hp = hp - player_at;
-        Console.ForegroundColor = ConsoleColor.Red;
-        frase("➹ Atacou!\n",25);
-        Thread.Sleep(55);
+        status_math();
+        luck_mode = "";
+        def_Test = player_Maxhp + dice(2,6,0);
+        atk_Test = enemy.Item2 + dice(2,6,0);
+        if (def_Test > atk_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            hp = hp - atk_dmg;
+            frase($"➹ {you} contra-ataca!\n",25);
+        }
+        else if (def_Test < atk_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            player_hp = player_hp - def_dmg;
+            frase($"➹ {monster} Acertou!\n",25);
+        }
+        else if (def_Test == atk_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            frase("➹ Ambos erram o Ataque!\n",25);
+        }
+        morte();
+        loaded();
     }
-}
-else
-{
-    loop();
 }
 }
 void turns()
 {
 Console.Clear();
 Console.ForegroundColor = ConsoleColor.White;
-Console.WriteLine($"{monster} HP {bar()} {hp}/{enemy.Item2} AT {atk}➶");
+bar(hp,enemy.Item2);
+Console.WriteLine($"{monster} HP {hpbar} {hp}/{enemy.Item2} AT {atk}➶");
 Console.ForegroundColor = ConsoleColor.Cyan;
-Console.WriteLine($"{you} HP {player_hp}/{player_Maxhp} AT {player_at}➶ LU {player_lu}✤\n");
+bar(player_hp,player_Maxhp);
+Console.WriteLine($"{you} HP {hpbar} {player_hp}/{player_Maxhp} AT {player_at}➶ LU {player_lu}✤\n");
 loop();
-if (hp <= 0 && derrotado == true && stage < 2)
+if (hp <= 0 && derrotado == true && stage < finalStage)
 {
     stage++;
     updt();
@@ -188,6 +276,7 @@ if (hp <= 0 && derrotado == true && stage < 2)
 }
 else if (player_hp <= 0 && player_derrotado == true)
 {
+    Console.Clear();
     Console.ForegroundColor = ConsoleColor.Red;
     frase("ˣˣˣVocê perdeuˣˣˣ",37);
     frase(" . . . ➟\n",50);
@@ -197,7 +286,7 @@ else if (player_hp <= 0 && player_derrotado == true)
     frase("❚ ❚ Fim da Demo! ❚ ❚\n",25);
     Console.ResetColor();
 }
-else if (hp > 0 && derrotado == false && stage <= 2)
+else if (hp > 0 && derrotado == false && stage <= finalStage)
 {
     turns();
 }
