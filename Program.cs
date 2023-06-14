@@ -1,4 +1,5 @@
-﻿string 
+﻿Console.OutputEncoding = System.Text.Encoding.UTF8;
+string 
 monster, // monster name 
 acao, // type of action choosed 
 you, // player name 
@@ -8,7 +9,7 @@ luck_mode = ""; // luck status (now)
 bool derrotado, // monster defeat
 player_derrotado = false; // player defeat
 
-int stage = 1, finalStage = 3, // stage settings
+int stage = 1, finalStage = 11, // stage settings
 rolagem = 1, result, // dice placeholder
 hp, atk, // monster stats (now)
 player_hp, player_Maxhp, player_at, player_lu, // player stats
@@ -93,13 +94,37 @@ void updt()
 switch (stage)
 {
     case 1:
-    enemy=(monster="Lobo Mau",hp=4,atk=5,derrotado = false);
+    enemy=(monster="Lobo Cinzento",hp=3,atk=3,derrotado = false);
     break;
     case 2:
-    enemy=(monster="Lobo Bom",hp=10,atk=7,derrotado = false);
+    enemy=(monster="Lobo Branco",hp=3,atk=3,derrotado = false);
     break;
     case 3:
-    enemy=(monster="Sans",hp=1,atk=666,derrotado = false);
+    enemy=(monster="Goblin",hp=5,atk=4,derrotado = false);
+    break;
+    case 4:
+    enemy=(monster="Orc Vesgo",hp=5,atk=5,derrotado = false);
+    break;
+    case 5:
+    enemy=(monster="Orc Barbudo",hp=5,atk=5,derrotado = false);
+    break;
+    case 6:
+    enemy=(monster="Zumbi Manco",hp=6,atk=7,derrotado = false);
+    break;
+    case 7:
+    enemy=(monster="Zumbi Balofo",hp=6,atk=7,derrotado = false);
+    break;
+    case 8:
+    enemy=(monster="Troll",hp=8,atk=7,derrotado = false);
+    break;
+    case 9:
+    enemy=(monster="Ogro",hp=8,atk=9,derrotado = false);
+    break;
+    case 10:
+    enemy=(monster="Ogro Furioso",hp=10,atk=9,derrotado = false);
+    break;
+    case 11:
+    enemy=(monster="Necromante Maligno",hp=12,atk=12,derrotado = false);
     break;
     default:
     break;
@@ -190,6 +215,7 @@ if (acao.Trim().ToLower().Substring(0,1) == "s")
             luck_mode = "unlucky";
             loaded();
         }
+        player_lu -= 1;
     }
     else if (hp > 0 && luck_mode != "")
     {
