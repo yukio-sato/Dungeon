@@ -71,10 +71,11 @@ void bar(int now, int max)
 void loaded()
 {
     Console.ForegroundColor = ConsoleColor.White;
-    frase("Pressione qualquer ⌨  tecla para continuar",12);
+    frase("Pressione qualquer ⌨  tecla para continuar",10);
     frase(" . . . ➟\n",37);
     Console.ReadKey();
 }
+Console.Clear();
 Console.ForegroundColor = ConsoleColor.Gray;
 frase("✎ Digite o nome: ",25);
 you = Console.ReadLine()!.Trim();
@@ -103,7 +104,7 @@ switch (stage)
     enemy=(monster="Goblin",hp=5,atk=4,derrotado = false);
     break;
     case 4:
-    enemy=(monster="Orc Vesgo",hp=5,atk=5,derrotado = false);
+    enemy=(monster="Orc Vesgo",hp=5,atk=5,derrotado = true);
     break;
     case 5:
     enemy=(monster="Orc Barbudo",hp=5,atk=5,derrotado = false);
@@ -204,14 +205,14 @@ if (acao.Trim().ToLower().Substring(0,1) == "s")
         if (luck_Test <= player_lu)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            frase("Sortudo\n",50);
+            frase("Sortudo\n",45);
             luck_mode = "lucky";
             loaded();
         }
         else if (luck_Test > player_lu)
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            frase("Azarado\n",50);
+            frase("Azarado\n",45);
             luck_mode = "unlucky";
             loaded();
         }
