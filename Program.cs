@@ -104,7 +104,7 @@ switch (stage)
     enemy=(monster="Goblin",hp=5,atk=4,derrotado = false);
     break;
     case 4:
-    enemy=(monster="Orc Vesgo",hp=5,atk=5,derrotado = true);
+    enemy=(monster="Orc Vesgo",hp=5,atk=5,derrotado = false);
     break;
     case 5:
     enemy=(monster="Orc Barbudo",hp=5,atk=5,derrotado = false);
