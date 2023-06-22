@@ -1,4 +1,5 @@
-﻿Console.OutputEncoding = System.Text.Encoding.UTF8;
+﻿#pragma warning disable CA1416
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 string 
 monster, // monster name 
 acao, // type of action choosed 
@@ -18,15 +19,44 @@ luck_Test, atk_Test, def_Test, // player/enemy tests
 atk_dmg = 0, def_dmg = 0; // damage player/enemy for atk and def;
 var enemy=(monster="",hp=0,atk=0, derrotado = false); // where set the above var
 
+void X_Beep(int x, int x2)
+{
+    Console.Beep(x,x2);
+    Console.Write("ˣ");
+}
+void dmgSound()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        Console.Beep(800,125);
+    }
+        Console.Beep(625,575);
+}
+void ATSound()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        Console.Beep(600,100);
+    }
+    Console.Beep(600,450);
+}
+void EnemyATSound()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        Console.Beep(550,100);
+    }
+    Console.Beep(550,450);
+}
 void frase(string txt, int cooldown)
 {
     for (int i = 0; i < txt.Length; i++)
     {
-        Console.Write(txt[i]);
         if (txt[i].ToString() != " " && txt[i].ToString() != "")
         {
-        Thread.Sleep(cooldown);
+        Console.Beep(1125,cooldown-1);
         }
+        Console.Write(txt[i]);
     }
 }
 int dice(int quantity,int maximo, int bns)
@@ -121,7 +151,7 @@ void loaded()
 void nameAsk()
 {
 Console.Clear();
-frase($"✎ Digite o Nome: {you.PadRight(12,'_')}",0);
+Console.Write($"✎ Digite o Nome: {you.PadRight(12,'_')}");
 var pressed = Console.ReadKey()!;
 if (pressed.Key != ConsoleKey.Backspace && pressed.Key != ConsoleKey.Enter && you.Length <= 12)
 {
@@ -217,6 +247,11 @@ void morte()
         Console.ForegroundColor = ConsoleColor.DarkGray;
         frase($"✝ {you} caiu! ✝",25);
         frase(" . . . ➟\n",125);
+        Console.Beep(950,900);
+        Console.Beep(900,800);
+        Console.Beep(850,700);
+        Console.Beep(800,600);
+        Console.Beep(750,1000);
     }
     else if (hp <= 0 && derrotado == false)
     {
@@ -234,11 +269,20 @@ void morte()
         Console.WriteLine($" AT {atk}➶\n");
         Console.ForegroundColor = ConsoleColor.Red;
         frase($"✝ {monster} foi derrotado! ✝\n", 25);
+        Console.Beep(900,120);
+        Console.Beep(900,120);
+        Console.Beep(900,120);
+        Console.Beep(900,120);
+        Console.Beep(1100,270);
         if (stage >= finalStage)
         {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Clear();
         frase($"❚ ❚ {you} matou todos os monstros! ❚ ❚\n",25);
+        Console.Beep(1250,400);
+        Console.Beep(750,400);
+        Console.Beep(1250,400);
+        Console.Beep(1550,600);
         Console.ResetColor();
         }
     }
@@ -264,15 +308,15 @@ void status_math()
 void loop()
 {
 Console.ForegroundColor = ConsoleColor.White;
-frase("╔─── Ações ──────────────╗\n",0);
+Console.WriteLine("╔─── Ações ──────────────╗");
 Console.ForegroundColor = ConsoleColor.DarkRed;
-frase("│ Ⓐ tacar                │\n",0);
+Console.WriteLine("│ Ⓐ tacar                │");
 Console.ForegroundColor = ConsoleColor.DarkGray;
-frase("│ Ⓓ efender              │\n",0);
+Console.WriteLine("│ Ⓓ efender              │");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
-frase("│ Ⓢ orte                 │\n",0);
+Console.WriteLine("│ Ⓢ orte                 │");
 Console.ForegroundColor = ConsoleColor.White;
-frase("╚────────────────────────╝\n",0);
+Console.WriteLine("╚────────────────────────╝");
 acao = Console.ReadLine()!;
 if (acao.Trim() == "")
 {
@@ -285,6 +329,11 @@ if (acao.Trim().ToLower().Substring(0,1) == "s")
         Console.ForegroundColor = ConsoleColor.DarkGreen;
         frase($"✤ {you} testou a Sorte!\n",25);
         luck_Test = dice(2,6,0);
+        Console.Beep(800,100);
+        Console.Beep(800,100);
+        Console.Beep(800,100);
+        Console.Beep(800,100);
+        Console.Beep(900,250);
         if (luck_Test <= player_lu)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -322,21 +371,26 @@ if (acao.Trim().ToLower().Substring(0,1) == "a")
             Console.ForegroundColor = ConsoleColor.Cyan;
             hp = hp - atk_dmg;
             frase($"➹ {you} Ataca!\n",25);
+            ATSound();
             Console.ForegroundColor = ConsoleColor.DarkRed;
             frase($"♡ {monster} perdeu {atk_dmg} HP\n",12);
+            dmgSound();
         }
         else if (atk_Test < def_Test)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             player_hp = player_hp - def_dmg;
             frase($"➹ {monster} Contra-ataca!\n",25);
+            EnemyATSound();
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            frase($"♡ {you} recebe {def_dmg} HP\n",12);
+            frase($"♡ {you} perdeu {def_dmg} HP\n",12);
+            dmgSound();
         }
         else if (atk_Test == def_Test)
         {
             Console.ForegroundColor = ConsoleColor.White;
             frase("➹ Ambos erram o Ataque!\n",25);
+            Console.Beep(850,1450);
         }
         morte();
         loaded();
@@ -357,15 +411,19 @@ else if (acao.Trim().ToLower().Substring(0,1) == "d")
             {
             hp = hp - (atk_dmg-1);
             frase($"➹ {you} Contra-ataca!\n",25);
+            ATSound();
             Console.ForegroundColor = ConsoleColor.DarkRed;
             frase($"♡ {monster} perdeu {atk_dmg-1} HP\n",12);
+            dmgSound();
             }
             else if (atk_Test >= player_at)
             {
             player_hp = player_hp - (def_dmg-1);
             frase($"➹ {you} Bloqueiou!\n",25);
+            EnemyATSound();
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            frase($"♡ {you} recebe {def_dmg-1} HP\n",12);
+            frase($"♡ {you} perdeu {def_dmg-1} HP\n",12);
+            dmgSound();
             }
         }
         else if (def_Test < atk_Test)
@@ -375,21 +433,26 @@ else if (acao.Trim().ToLower().Substring(0,1) == "d")
             {
             player_hp = player_hp - (def_dmg-1);
             frase($"➹ {monster} Ataca!\n",25);
+            EnemyATSound();
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            frase($"♡ {you} recebe {def_dmg-1} HP\n",12);
+            frase($"♡ {you} perdeu {def_dmg-1} HP\n",12);
+            dmgSound();
             }
             else if (def_Test >= atk)
             {
             hp = hp - (atk_dmg-1);
             frase($"➹ {monster} Bloqueiou!\n",25);
+            ATSound();
             Console.ForegroundColor = ConsoleColor.DarkRed;
             frase($"♡ {monster} perdeu {atk_dmg-1} HP\n",12);
+            dmgSound();
             }
         }
         else if (def_Test == atk_Test)
         {
             Console.ForegroundColor = ConsoleColor.White;
             frase("➹ Ambos erram o Ataque!\n",25);
+            Console.Beep(850,1450);
         }
         morte();
         loaded();
@@ -432,6 +495,19 @@ else if (player_hp <= 0 && player_derrotado == true)
     Console.ReadKey();
     Console.ForegroundColor = ConsoleColor.White;
     frase("\n\nˣ GAME OVER ˣ\n",125);
+    Thread.Sleep(500);
+    Console.Clear();
+    X_Beep(550,800);
+    X_Beep(550,600);
+    X_Beep(550,400);
+    X_Beep(550,300);
+    X_Beep(550,200);
+    X_Beep(550,100);
+    for (int l = 0; l < 22; l++)
+    {
+        X_Beep(550,50-l);
+    }
+    Console.Clear();
     Console.ResetColor();
 }
 else if (hp > 0 && derrotado == false && stage <= finalStage)
