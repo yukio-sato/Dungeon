@@ -310,8 +310,8 @@ switch (stage)
     enemy=($"{you}?",player_Maxhp,player_at);
     narrador=(
         $"O cenário vazio te deixa bastante confuso e desconfortavel. . .",
-        $". . .",
-        $"Sua mente se esvazia conforme a batalha progressede. . .",
+        $". . . . . . . . . . . . . ?",
+        $"Sua mente esvazia-se conforme a batalha procede. . .",
         $"Sua Determinação. . . Sua Criação. . . vai colocar um Fim. . ."
     );
     break;
@@ -320,6 +320,10 @@ switch (stage)
 monster = enemy.Item1;
 hp = enemy.Item2;
 atk = enemy.Item3;
+interaction1 = narrador.Item1;
+interaction2 = narrador.Item2;
+interaction3 = narrador.Item3;
+interaction4 = narrador.Item4;
 }
 void morte()
 {
@@ -341,20 +345,40 @@ void morte()
         hp = 0;
         defeat = true;
         Console.Clear();
+        if (stage > 0)
+        {
         Console.ForegroundColor = ConsoleColor.DarkRed;
+        }
+        else
+        {
+        Console.ForegroundColor = ConsoleColor.Black;
+        }
         bar(hp,enemy.Item2, "Monster");
         Console.WriteLine("「".PadLeft((14-monster.Length/2),'▁')+monster+"」".PadRight((14-monster.Length/2),'▁'));
         Console.ForegroundColor = ConsoleColor.Green;
         Console.Write($" HP {hpbar} {hp.ToString().PadLeft(2,'0')}/{enemy.Item2.ToString().PadLeft(2,'0')}");
         Console.ForegroundColor = ConsoleColor.DarkRed;
         Console.WriteLine($" AT {atk}➶\n");
+        if (stage > 0)
+        {
         Console.ForegroundColor = ConsoleColor.Red;
         textDialog($"✝ {monster} foi derrotado! ✝\n", 25);
-        Console.Beep(900,120);
-        Console.Beep(900,120);
-        Console.Beep(900,120);
-        Console.Beep(900,120);
+        for (int i = 0; i < 4; i++)
+        {
+            Console.Beep(900,120);
+        }
         Console.Beep(1100,270);
+        }
+        else
+        {
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        textDialog($"{monster} foi apagado. . .\n", 105);
+        for (int i = 0; i < 4; i++)
+        {
+            Console.Beep(950-(i*50),900-(i*250));
+        }
+        Console.Beep(750,1000);
+        }
         if (stage >= finalStage) // if you are on the last stage when enemy die (verify)
         {
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -570,7 +594,14 @@ void turns() // battle stats + loop
 {
 Console.Clear();
 // --------------------------------------Monster-----------------------------------------
+if (stage > 0)
+{
 Console.ForegroundColor = ConsoleColor.DarkRed;
+}
+else
+{
+Console.ForegroundColor = ConsoleColor.Black;
+}
 bar(hp,enemy.Item2,"Monster");
 Console.WriteLine("「".PadLeft((14-monster.Length/2),'▁')+monster+"」".PadRight((14-monster.Length/2),'▁'));
 Console.ForegroundColor = ConsoleColor.Green;
@@ -622,12 +653,10 @@ else if (hp > 0 && defeat == false && stage <= finalStage) // when you still ali
     turns();
 }
 }
-
 encounter = dice(1,100,0);
-if (encounter <= 5) // chance for YOU?
+if (encounter <= 50) // chance for YOU?
 {
     stage = 0;
 }
-
 updt(); // first monster update status
 turns(); // begin of battle
