@@ -275,7 +275,7 @@ switch (stage)
     narrador=(
         $"{enemy.Item1} fez uma TROLLagem em você!",
         $"{enemy.Item1} desconfortavel começa a sorrir.",
-        $"{enemy.Item1} o sorriso te lembra de algo?",
+        $"{enemy.Item1} demonstra seu sorriso, te lembra de algo?",
         $"{enemy.Item1}Face deu umas risadas."
     );
     break;
