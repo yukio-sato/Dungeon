@@ -280,7 +280,7 @@ switch (stage)
     enemy=("Orc Vesgo",5,5,4,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} acabou de intimidar até sua alma.",
-        $"{enemy.Item1} tentou enxergar você\n✶ Mas falha miseravelmente.",
+        $"{enemy.Item1} tentou enxergar você.\n✶ Mas falha miseravelmente.",
         $"{enemy.Item1} cansou-se e começa a ler um livro\n✶ Parece um de literatura.",
         $"{enemy.Item1} começa a falar algo sem sentido?"
     );
@@ -316,8 +316,8 @@ switch (stage)
     enemy=("Troll",8,7,7,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} fez uma TROLLagem em você!",
-        $"{enemy.Item1} desconfortavel\n✶ Começa a sorrir.",
-        $"{enemy.Item1} demonstra seu sorriso\n✶ Te lembra de algo?",
+        $"{enemy.Item1} alegremente.\n✶ Começa a sorrir.",
+        $"{enemy.Item1} demonstra seu sorriso.\n✶ Te lembra de algo?",
         $"{enemy.Item1}Face deu umas risadas."
     );
     break;
@@ -343,7 +343,7 @@ switch (stage)
     enemy=("Necromante Maligno",12,12,12,xpMonsterMath());
     narrador=(
         $"O ambiente começa a ficar mais tenso. . .",
-        $"O cemitério\n✶ Os ventos\n* Te incomodam. . .",
+        $"O cemitério.\n✶ Os ventos.\n* Te incomodam. . .",
         $"A aventura de {you} chegou ao fim. . .",
         $"Você só queria terminar essa Masmorra. . ."
     );
