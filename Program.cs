@@ -19,17 +19,50 @@ firstEncounter = true; // player defeat
 
 int stage = 1, finalStage = 11, // stage settings
 rolled = 1, result, // dice placeholder
-hp, atk, // monster stats (now)
+hp, atk, xp, lv, // monster stats (now)
 encounter, // monster encounter when begin
+plaHL, monHL, // monster/player Half Length
 player_hp, player_Maxhp, player_at, player_lu, // player stats
 luck_Test, atk_Test, def_Test, // player/enemy tests
 atk_dmg = 0, def_dmg = 0, // damage player/enemy for atk and def
 heartLength = 5, // the number of character of Heart Bar
-interactNumber = 1; // random number for interact
+interactNumber = 1, // random number for interact
+executionPoints = 0, // actual exp
+next = 25, // exp modify for next love
+love = 1, // actual love
+xpMath = 10 + (next*(love - 1)); // math of next exp for love
 
-
-var enemy=(monster="",hp=0,atk=0); // where set the above var
+var enemy=(monster="",hp=0,atk=0,lv=0,xp=0); // where set the above var
 var narrador=(interaction1="",interaction2="",interaction3="",interaction4=""); // text writer about monster/interactions!
+
+
+void Levelviolence() // love for every kill you do
+{
+    xpMath = 10 + (next*(love - 1));
+    if (executionPoints >= xpMath)
+    {
+        executionPoints -= xpMath;
+        love++;
+        textDialog($"{you} subiu de LV!\n",25);
+        if (love % 4 == 0)
+        {
+        player_hp += 1;
+        player_Maxhp += 1;
+        textDialog($"Aumentou 1 de HP!\n",25);
+        }
+        else
+        {
+        player_at += 1;
+        textDialog($"Aumentou 1 de AT!\n",25);
+        }
+    }
+}
+
+int xpMonsterMath() // xp math with monster lv when kill
+{
+    int monsterXp = 10 + (5*(enemy.Item4 - 1));
+    return monsterXp;
+}
 
 void X_Beep(int x, int x2) // last message/letter after die + beep
 {
@@ -207,8 +240,17 @@ void updt()
 {
 switch (stage)
 {
+    case 0:
+    enemy=($"{you}?",player_Maxhp,player_at,love,xpMonsterMath());
+    narrador=(
+        $"O cenário está vazio. . .\n✶ Te deixa bastante confuso e desconfortavel. . .",
+        $". . . ?",
+        $"Sua mente esvazia-se. . .\n✶ Conforme a batalha procede. . .",
+        $"Sua Determinação. . .\n✶ Sua Criação. . .\n✶ Vai colocar um Fim. . ."
+    );
+    break;
     case 1:
-    enemy=("Lobo Cinzento",3,3);
+    enemy=("Lobo Cinzento",3,3,1,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} ataca ferozamente!",
         $"{enemy.Item1} late ferozamente!",
@@ -217,7 +259,7 @@ switch (stage)
     );
     break;
     case 2:
-    enemy=("Lobo Branco",3,3);
+    enemy=("Lobo Branco",3,3,1,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} ataca calmamente.",
         $"{enemy.Item1} late calmamente.",
@@ -226,25 +268,25 @@ switch (stage)
     );
     break;
     case 3:
-    enemy=("Goblin",5,4);
+    enemy=("Goblin",5,4,2,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} te encara!",
         $"{enemy.Item1} começa a saltitar!",
-        $"{enemy.Item1} faz. . . algo impossível de descrever?",
-        $"{enemy.Item1} aponta sua lança! PERA! onde veio isto!?"
+        $"{enemy.Item1} faz. . .\n✶ Algo impossível de descrever?",
+        $"{enemy.Item1} aponta sua lança!\n✶ PERA!\n✶ Onde veio isto!?"
     );
     break;
     case 4:
-    enemy=("Orc Vesgo",5,5);
+    enemy=("Orc Vesgo",5,5,4,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} acabou de intimidar até sua alma.",
-        $"{enemy.Item1} tentou enxergar você, mas falha miseravelmente.",
-        $"{enemy.Item1} cansou-se e começa a ler um livro, parece um de literatura.",
+        $"{enemy.Item1} tentou enxergar você\n✶ Mas falha miseravelmente.",
+        $"{enemy.Item1} cansou-se e começa a ler um livro\n✶ Parece um de literatura.",
         $"{enemy.Item1} começa a falar algo sem sentido?"
     );
     break;
     case 5:
-    enemy=("Orc Barbudo",5,5);
+    enemy=("Orc Barbudo",5,5,4,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} demonstra sua barba!",
         $"{enemy.Item1} reflete a luz!",
@@ -253,7 +295,7 @@ switch (stage)
     );
     break;
     case 6:
-    enemy=("Zumbi Manco",6,7);
+    enemy=("Zumbi Manco",6,7,5,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} corre rapidamente em sua direção!",
         $"{enemy.Item1} ele questiona o sentido da vida.",
@@ -262,25 +304,25 @@ switch (stage)
     );
     break;
     case 7:
-    enemy=("Zumbi Balofo",6,7);
+    enemy=("Zumbi Balofo",6,7,5,xpMonsterMath());
     narrador=(
-        $"{enemy.Item1} urg (Não consigo respirar!)",
+        $"urg.\n (Não consigo respirar!)",
         $"{enemy.Item1} está fedendo. . .",
         $"{enemy.Item1} abre sua boca em minha direçã-",
         $"Narrador morre após fedor de {enemy.Item1}. . ."
     );
     break;
     case 8:
-    enemy=("Troll",8,7);
+    enemy=("Troll",8,7,7,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} fez uma TROLLagem em você!",
-        $"{enemy.Item1} desconfortavel começa a sorrir.",
-        $"{enemy.Item1} demonstra seu sorriso, te lembra de algo?",
+        $"{enemy.Item1} desconfortavel\n✶ Começa a sorrir.",
+        $"{enemy.Item1} demonstra seu sorriso\n✶ Te lembra de algo?",
         $"{enemy.Item1}Face deu umas risadas."
     );
     break;
     case 9:
-    enemy=("Ogro",8,9);
+    enemy=("Ogro",8,9,7,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} senta-se.",
         $"{enemy.Item1} balança sua arma.",
@@ -289,37 +331,32 @@ switch (stage)
     );
     break;
     case 10:
-    enemy=("Ogro Furioso",10,9);
+    enemy=("Ogro Furioso",10,9,10,xpMonsterMath());
     narrador=(
         $"{enemy.Item1} lembrou-se do motivo para lutar!",
         $"{enemy.Item1} começa contemplar sua dor!",
         $"{enemy.Item1} prepara sua posição de combate!",
-        $"{enemy.Item1} arremessa lama na tua cara!"
+        $"{enemy.Item1} arremessa lama!\n✶ Parou na tua cara!"
     );
     break;
     case 11:
-    enemy=("Necromante Maligno",12,12);
+    enemy=("Necromante Maligno",12,12,12,xpMonsterMath());
     narrador=(
         $"O ambiente começa a ficar mais tenso. . .",
-        $"O cemitério, os ventos, te incomodam. . .",
+        $"O cemitério\n✶ Os ventos\n* Te incomodam. . .",
         $"A aventura de {you} chegou ao fim. . .",
         $"Você só queria terminar essa Masmorra. . ."
     );
     break;
     default:
-    enemy=($"{you}?",player_Maxhp,player_at);
-    narrador=(
-        $"O cenário vazio te deixa bastante confuso e desconfortavel. . .",
-        $". . . . . . . . . . . . . ?",
-        $"Sua mente esvazia-se conforme a batalha procede. . .",
-        $"Sua Determinação. . . Sua Criação. . . vai colocar um Fim. . ."
-    );
     break;
 }
 // monster stats update
 monster = enemy.Item1;
 hp = enemy.Item2;
 atk = enemy.Item3;
+lv = enemy.Item4;
+xp = xpMonsterMath();
 interaction1 = narrador.Item1;
 interaction2 = narrador.Item2;
 interaction3 = narrador.Item3;
@@ -354,15 +391,24 @@ void morte()
         Console.ForegroundColor = ConsoleColor.Black;
         }
         bar(hp,enemy.Item2, "Monster");
-        Console.WriteLine("「".PadLeft((14-monster.Length/2),'▁')+monster+"」".PadRight((14-monster.Length/2),'▁'));
+        monHL = 14-monster.Length/2;
+        Console.WriteLine("「".PadLeft((monHL),'▁')+monster+"」".PadRight((monHL),'▁'));
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(" LV "+lv.ToString().PadLeft(2,'0')+"  EXP ?/?");
         Console.ForegroundColor = ConsoleColor.Green;
         Console.Write($" HP {hpbar} {hp.ToString().PadLeft(2,'0')}/{enemy.Item2.ToString().PadLeft(2,'0')}");
         Console.ForegroundColor = ConsoleColor.DarkRed;
-        Console.WriteLine($" AT {atk}➶\n");
+        Console.Write($" AT {atk}➶ ");
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        Console.WriteLine($" LU ?✤\n");
+        executionPoints += xp;
         if (stage > 0)
         {
         Console.ForegroundColor = ConsoleColor.Red;
         textDialog($"✝ {monster} foi derrotado! ✝\n", 25);
+        Console.ForegroundColor = ConsoleColor.White;
+        textDialog($"{you} ganhou {xpMonsterMath()} de EXP!\n",25);
+        Levelviolence();
         for (int i = 0; i < 4; i++)
         {
             Console.Beep(900,120);
@@ -373,6 +419,9 @@ void morte()
         {
         Console.ForegroundColor = ConsoleColor.DarkGray;
         textDialog($"{monster} foi apagado. . .\n", 105);
+        Console.ForegroundColor = ConsoleColor.Gray;
+        textDialog($"{you} substituiu, ganhando {xpMonsterMath()} de EXP.\n",25);
+        Levelviolence();
         for (int i = 0; i < 4; i++)
         {
             Console.Beep(950-(i*50),900-(i*250));
@@ -425,16 +474,16 @@ Console.ForegroundColor = ConsoleColor.White;
 switch (interactNumber)
 {
     case 1:
-        textDialog(narrador.Item1+"\n",25);
+        textDialog("✶ "+narrador.Item1+"\n",2);
     break;
     case 2:
-        textDialog(narrador.Item2+"\n",25);
+        textDialog("✶ "+narrador.Item2+"\n",2);
     break;
     case 3:
-        textDialog(narrador.Item3+"\n",25);
+        textDialog("✶ "+narrador.Item3+"\n",2);
     break;
     default:
-        textDialog(narrador.Item4+"\n",25);
+        textDialog("✶ "+narrador.Item4+"\n",2);
     break;
 }
 
@@ -603,15 +652,24 @@ else
 Console.ForegroundColor = ConsoleColor.Black;
 }
 bar(hp,enemy.Item2,"Monster");
-Console.WriteLine("「".PadLeft((14-monster.Length/2),'▁')+monster+"」".PadRight((14-monster.Length/2),'▁'));
+monHL = 14-monster.Length/2;
+Console.WriteLine("「".PadLeft((monHL),'▁')+monster+"」".PadRight((monHL),'▁'));
+Console.ForegroundColor = ConsoleColor.White;
+Console.WriteLine(" LV "+lv.ToString().PadLeft(2,'0')+"  EXP ?/?");
 Console.ForegroundColor = ConsoleColor.Green;
 Console.Write($" HP {hpbar} {hp.ToString().PadLeft(2,'0')}/{enemy.Item2.ToString().PadLeft(2,'0')}");
 Console.ForegroundColor = ConsoleColor.DarkRed;
-Console.WriteLine($" AT {atk}➶\n");
+Console.Write($" AT {atk}➶ ");
+Console.ForegroundColor = ConsoleColor.DarkGreen;
+Console.WriteLine($" LU ?✤\n");
 // --------------------------------------Player-----------------------------------------
 Console.ForegroundColor = ConsoleColor.Cyan;
 bar(player_hp,player_Maxhp,"Player");
-Console.WriteLine("「".PadLeft((14-you.Length/2),'▁')+you+"」".PadRight((14-you.Length/2),'▁'));
+plaHL = 14-you.Length/2;
+Console.WriteLine("「".PadLeft((plaHL),'▁')+you+"」".PadRight((plaHL),'▁'));
+Console.ForegroundColor = ConsoleColor.White;
+Levelviolence();
+Console.WriteLine(" LV "+love.ToString().PadLeft(2,'0')+$" EXP {executionPoints}/{xpMath}");
 Console.ForegroundColor = ConsoleColor.Green;
 Console.Write($" HP {playerhpbar} {player_hp.ToString().PadLeft(2,'0')}/{player_Maxhp.ToString().PadLeft(2,'0')}");
 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -659,4 +717,8 @@ if (encounter <= 50) // chance for YOU?
     stage = 0;
 }
 updt(); // first monster update status
+
+
+
+
 turns(); // begin of battle
