@@ -56,7 +56,7 @@ void Levelviolence() // love for every kill you do
         textDialog($"{you.name} subiu de LV {you.lv-1} > {you.lv}!\n",25);
         if (you.lv % 4 == 0)
         {
-        hp += 1;
+        player_hp += 1;
         you.hp += 1;
         Console.ForegroundColor = ConsoleColor.Green;
         textDialog($"Aumentou 1 de HP!\n",25);
