@@ -12,7 +12,9 @@ secretEcounter = false;
 var you=(name: "",hp: 0,at: 0,lu: 0,lv: 1,exp: 0, gold: 0); // [1] Name, [2] HP, [3] ATK, [4] LUCK, [5] LV, [6] EXP
 var enemy=(name: "",hp: 0,at: 0,lv: 0); // [1] Name, [2] HP, [3] ATK, [4] LV
 var narrador=(act1: "",act2: "",act3: "",act4: ""); // [1] Interactions, [2] Interactions, [3] Interactions, [4] Interactions
-
+var item=(name: "",cost: 0, max: 0); // [1] Item Name, [2] Cost, [3] Max amount
+var inventory=(slot1: "─", slot2: "─", slot3: "─", slot4: "─"); // Player Inventory Slots
+var shopMenu=(option1: "", option2: "", option3: "", option4: ""); // Shop placeholder slots
 
 int stage = 0, finalStage = 11, // stage settings
 rolled = 1, result, // dice placeholder
@@ -26,7 +28,9 @@ atk_dmg = 0, def_dmg = 0, // damage player/enemy for atk and def
 heartLength = 5, // the number of character of Heart Bar
 interactNumber = 0, // random number for interact
 next = 25, // exp modify for next love
-xpMath = 10 + (next*(you.lv - 1)); // math of next exp for love
+xpMath = 10 + (next*(you.lv - 1)), // math of next exp for love
+selected = 1, // selected
+gold = 125; // player gold
 
 void secretEncounter()
 {
@@ -40,9 +44,218 @@ if (encounter <= 25) // chance for YOU?
 }
 }
 
-void shop()
-{
 
+void FoodInventory(string food, int amount)
+{
+    if (inventory.slot1 == "─" || inventory.slot1.Substring(0,food.Length) == food)
+    {
+        if (inventory.slot1 != "─" && inventory.slot1.Substring(0,food.Length) == food)
+        {
+            inventory.slot1 = food+"_"+(Convert.ToInt16(inventory.slot1.Substring(food.Length+1))+amount);
+        }
+        else
+        {
+            inventory.slot1 = food+"_"+amount;
+        }
+    }
+    else if (inventory.slot2 == "─" || inventory.slot2.Substring(0,food.Length) == food)
+    {
+        if (inventory.slot2 != "─" && inventory.slot2.Substring(0,food.Length) == food)
+        {
+            inventory.slot2 = food+"_"+(Convert.ToInt16(inventory.slot2.Substring(food.Length+1))+amount);
+        }
+        else
+        {
+            inventory.slot2 = food+"_"+amount;
+        }
+    }
+    else if (inventory.slot3 == "─" || inventory.slot3.Substring(0,food.Length) == food)
+    {
+        if (inventory.slot3 != "─" && inventory.slot3.Substring(0,food.Length) == food)
+        {
+            inventory.slot3 = food+"_"+(Convert.ToInt16(inventory.slot3.Substring(food.Length+1))+amount);
+        }
+        else
+        {
+            inventory.slot3 = food+"_"+amount;
+        }
+    }
+    else if (inventory.slot4 == "─" || inventory.slot4.Substring(0,food.Length) == food)
+    {
+        if (inventory.slot4 != "─" && inventory.slot4.Substring(0,food.Length) == food)
+        {
+            inventory.slot4 = food+"_"+(Convert.ToInt16(inventory.slot4.Substring(food.Length+1))+amount);
+        }
+        else
+        {
+            inventory.slot4 = food+"_"+amount;
+        }
+    }
+    else
+    {
+        textDialog("Não há espaço no seu Inventário",12);
+        Console.ReadKey();
+        shopDesign("Doce","A","B","E");
+    }
+    Console.WriteLine(inventory);
+    Console.ReadKey();
+    shopDesign("Doce","A","B","E");
+}
+string inventoryVerify(string food)
+{
+    string finded = "─";
+    if (inventory.slot1.Length >= food.Length && inventory.slot1.Substring(0,food.Length) == food)
+    {
+        finded = inventory.slot1;
+    }
+    else if (inventory.slot2.Length >= food.Length && inventory.slot2.Substring(0,food.Length) == food)
+    {
+        finded = inventory.slot2;
+    }
+    else if (inventory.slot3.Length >= food.Length && inventory.slot3.Substring(0,food.Length) == food)
+    {
+        finded = inventory.slot3;
+    }
+    else if (inventory.slot4.Length >= food.Length && inventory.slot4.Substring(0,food.Length) == food)
+    {
+        finded = inventory.slot4;
+    }
+    return finded;
+}
+
+void buy(string food)
+{
+    string answer = "";
+    Console.Clear();
+    textDialog($"Quer comprar {food}?\n",12);
+    answer = Console.ReadLine()!;
+    if (answer.Trim() == "")
+    {
+        answer = ".";
+    }
+    if (answer.Trim().ToLower().Substring(0,1) == "s")
+    {
+        if (gold >= item.cost && (inventoryVerify(food) == "─" || Convert.ToInt32(inventoryVerify(food).Substring(food.Length+1)) < item.max))
+        {
+            FoodInventory(food,1);
+        }
+        else if (item.max <= 0 || inventoryVerify(food) != "─" && Convert.ToInt32(inventoryVerify(food).Substring(food.Length+1)) >= item.max)
+        {
+        Console.ForegroundColor = ConsoleColor.Red;
+        textDialog("Está carregando muito ",12);
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        textDialog(food,12);
+        Console.ForegroundColor = ConsoleColor.Red;
+        textDialog("!\n",12);
+        Console.ReadKey();   
+        }
+        else if (gold < item.cost) 
+        {
+        Console.ForegroundColor = ConsoleColor.Red;
+        textDialog("Não possue ",12);
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        textDialog("Gold ",12);
+        Console.ForegroundColor = ConsoleColor.Red;
+        textDialog("suficiente!\n",12);
+        Console.ReadKey();
+        }
+        shopDesign("Doce","A","B","E");
+    }
+    else if (answer.Trim().ToLower().Substring(0,1) == "n")
+    {
+
+    }
+    else
+    {
+        buy(food);
+    }
+}
+void shopSelectedDesign(string option,int slot)
+{
+if (slot == selected)
+{
+    Console.ForegroundColor = ConsoleColor.DarkYellow;
+    Console.WriteLine($"[{option}]{"".PadRight(13-option.Length,'.')}");
+}
+else
+{
+    Console.ForegroundColor = ConsoleColor.Gray;
+    Console.WriteLine($"{option.PadRight(15,'.')}");  
+}
+}
+void shopDesign(string item1, string item2, string item3, string item4)
+{
+    Console.Clear();
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.WriteLine(".=──{Shop}───=.");
+    shopSelectedDesign(item1,1);
+    shopSelectedDesign(item2,2);
+    shopSelectedDesign(item3,3);
+    shopSelectedDesign(item4,4);
+    shopSelectedDesign("Exit",5);
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.WriteLine("'=───────────='");
+
+
+   ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
+    if (pressed.Key == ConsoleKey.UpArrow)
+    {
+        if (selected > 1)
+        {
+        selected -= 1;
+        }
+        else
+        {
+        selected = 5;
+        }
+        shopDesign(item1,item2,item3,item4);
+    }
+    else if (pressed.Key == ConsoleKey.DownArrow)
+    {
+        if (selected < 5)
+        {
+        selected += 1;
+        }
+        else
+        {
+        selected = 1;
+        }
+        shopDesign(item1,item2,item3,item4);
+    }
+    else if (pressed.Key == ConsoleKey.Enter)
+    {
+        if (selected < 5)
+        {
+            shop(selected);
+            buy(item.name);
+        }
+    }
+    else
+    {
+        shopDesign(item1,item2,item3,item4);
+    }
+}
+
+
+void shop(int x)
+{
+switch (x)
+{
+case 1:
+item=("Doce",15,3);
+break;
+case 2:
+item=("A",1,1);
+break;
+case 3:
+item=("B",0,0);
+break;
+case 4:
+item=("E",666,6);
+break;
+default:
+break;
+}
 }
 
 void Levelviolence() // love for every kill you do
@@ -706,6 +919,7 @@ else if (hp > 0 && stage <= finalStage) // when you still alive and enemy too, t
     turns();
 }
 }
+//shopDesign("Doce","A","B","E"); still on Beta
 secretEncounter();
 updt(); // first monster update status
 turns(); // begin of battle
