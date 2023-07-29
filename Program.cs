@@ -12,9 +12,9 @@ secretEcounter = false;
 var you=(name: "",hp: 0,at: 0,lu: 0,lv: 1,exp: 0, gold: 0); // [1] Name, [2] HP, [3] ATK, [4] LUCK, [5] LV, [6] EXP
 var enemy=(name: "",hp: 0,at: 0,lv: 0); // [1] Name, [2] HP, [3] ATK, [4] LV
 var narrador=(act1: "",act2: "",act3: "",act4: ""); // [1] Interactions, [2] Interactions, [3] Interactions, [4] Interactions
-var item=(name: "",cost: 0, max: 0); // [1] Item Name, [2] Cost, [3] Max amount
+var item=(name: "",cost: 0, max: 0,heal: 0); // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal
 var inventory=(slot1: "─", slot2: "─", slot3: "─", slot4: "─"); // Player Inventory Slots
-var shopMenu=(option1: "", option2: "", option3: "", option4: ""); // Shop placeholder slots
+var shopMenu=(option1: 0, option2: 0, option3: 0, option4: 0); // Shop placeholder slots
 
 int stage = 0, finalStage = 11, // stage settings
 rolled = 1, result, // dice placeholder
@@ -57,6 +57,7 @@ void FoodInventory(string food, int amount)
         {
             inventory.slot1 = food+"_"+amount;
         }
+        gold -= item.cost;
     }
     else if (inventory.slot2 == "─" || inventory.slot2.Substring(0,food.Length) == food)
     {
@@ -68,6 +69,7 @@ void FoodInventory(string food, int amount)
         {
             inventory.slot2 = food+"_"+amount;
         }
+        gold -= item.cost;
     }
     else if (inventory.slot3 == "─" || inventory.slot3.Substring(0,food.Length) == food)
     {
@@ -79,6 +81,7 @@ void FoodInventory(string food, int amount)
         {
             inventory.slot3 = food+"_"+amount;
         }
+        gold -= item.cost;
     }
     else if (inventory.slot4 == "─" || inventory.slot4.Substring(0,food.Length) == food)
     {
@@ -90,16 +93,17 @@ void FoodInventory(string food, int amount)
         {
             inventory.slot4 = food+"_"+amount;
         }
+        gold -= item.cost;
     }
     else
     {
         textDialog("Não há espaço no seu Inventário",12);
         Console.ReadKey();
-        shopDesign("Doce","A","B","E");
+        shopDesign();
     }
     Console.WriteLine(inventory);
     Console.ReadKey();
-    shopDesign("Doce","A","B","E");
+    shopDesign();
 }
 string inventoryVerify(string food)
 {
@@ -159,7 +163,7 @@ void buy(string food)
         textDialog("suficiente!\n",12);
         Console.ReadKey();
         }
-        shopDesign("Doce","A","B","E");
+        shopDesign();
     }
     else if (answer.Trim().ToLower().Substring(0,1) == "n")
     {
@@ -170,31 +174,51 @@ void buy(string food)
         buy(food);
     }
 }
-void shopSelectedDesign(string option,int slot)
+void shopSelectedDesign(int slot)
 {
 if (slot == selected)
 {
     Console.ForegroundColor = ConsoleColor.DarkYellow;
-    Console.WriteLine($"[{option}]{"".PadRight(13-option.Length,'.')}");
+    if (slot < 5)
+    {
+    Console.WriteLine($"[{item.name}]{"".PadRight(8-(item.name.Length+item.cost.ToString().Length),'.')}{item.cost} Gold");
+    }
+    else
+    {
+    Console.WriteLine($"[Exit]{"".PadRight(9,'.')}");   
+    }
 }
 else
 {
     Console.ForegroundColor = ConsoleColor.Gray;
-    Console.WriteLine($"{option.PadRight(15,'.')}");  
+    if (slot < 5)
+    {
+    Console.WriteLine($"{item.name.PadRight(10-item.cost.ToString().Length,'.')}{item.cost} Gold");  
+    }
+    else
+    {
+    Console.WriteLine($"Exit{"".PadRight(11,'.')}");   
+    }
 }
 }
-void shopDesign(string item1, string item2, string item3, string item4)
+void shopDesign()
 {
     Console.Clear();
     Console.ForegroundColor = ConsoleColor.DarkGray;
     Console.WriteLine(".=──{Shop}───=.");
-    shopSelectedDesign(item1,1);
-    shopSelectedDesign(item2,2);
-    shopSelectedDesign(item3,3);
-    shopSelectedDesign(item4,4);
-    shopSelectedDesign("Exit",5);
+    shop(shopMenu.option1);
+    shopSelectedDesign(1);
+    shop(shopMenu.option2);
+    shopSelectedDesign(2);
+    shop(shopMenu.option3);
+    shopSelectedDesign(3);
+    shop(shopMenu.option4);
+    shopSelectedDesign(4);
+    shopSelectedDesign(5);
     Console.ForegroundColor = ConsoleColor.DarkGray;
     Console.WriteLine("'=───────────='");
+    Console.ForegroundColor = ConsoleColor.DarkYellow;
+    Console.WriteLine($"{gold} Gold");
 
 
    ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
@@ -208,7 +232,7 @@ void shopDesign(string item1, string item2, string item3, string item4)
         {
         selected = 5;
         }
-        shopDesign(item1,item2,item3,item4);
+        shopDesign();
     }
     else if (pressed.Key == ConsoleKey.DownArrow)
     {
@@ -220,7 +244,7 @@ void shopDesign(string item1, string item2, string item3, string item4)
         {
         selected = 1;
         }
-        shopDesign(item1,item2,item3,item4);
+        shopDesign();
     }
     else if (pressed.Key == ConsoleKey.Enter)
     {
@@ -232,28 +256,154 @@ void shopDesign(string item1, string item2, string item3, string item4)
     }
     else
     {
-        shopDesign(item1,item2,item3,item4);
+        shopDesign();
     }
 }
 
+void slotDesign(string food,int slotSpace)
+{
+    string foodName = food.Substring(0,food.Length-2);
+    int autoSize = 10-(foodName.Length/2);
+    if ((slotSpace % 2) == 0)
+    {
+        if (slotSpace == selected)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"{"".PadLeft(autoSize-1,' ')}[{foodName}]{"".PadRight(autoSize-1,' ')}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine($"{"".PadLeft(autoSize,' ')}{foodName}{"".PadRight(autoSize,' ')}");  
+        }
+    }
+    else if (slotSpace < 5)
+    {
+        if (slotSpace == selected)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write($"{"".PadLeft(autoSize-1,' ')}[{foodName}]{"".PadRight(autoSize-1,' ')}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write($"{"".PadLeft(autoSize,' ')}{foodName}{"".PadRight(autoSize,' ')}");  
+        }
+    }
+    else
+    {
+        if (slotSpace == selected)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"{"".PadLeft(7,' ')}[Exit]{"".PadRight(7,' ')}");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine($"{"".PadLeft(8,' ')}Exit{"".PadRight(8,' ')}");  
+        } 
+    }
+}
+
+void inventoryMenu()
+{
+    Console.Clear();
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.WriteLine(".=──{Item}───=.");
+    slotDesign(inventory.slot1,1);
+    slotDesign(inventory.slot2,2);
+    slotDesign(inventory.slot3,3);
+    slotDesign(inventory.slot4,4);
+    slotDesign("Exit",5);
+    Console.ForegroundColor = ConsoleColor.DarkGray;
+    Console.WriteLine("'=───────────='");
+    Console.ForegroundColor = ConsoleColor.DarkYellow;
+    Console.WriteLine($"{gold} Gold");
+
+       ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
+    if (pressed.Key == ConsoleKey.UpArrow)
+    {
+        if (selected > 1)
+        {
+        selected -= 1;
+        }
+        else
+        {
+        selected = 5;
+        }
+        inventoryMenu();
+    }
+    else if (pressed.Key == ConsoleKey.DownArrow)
+    {
+        if (selected < 5)
+        {
+        selected += 1;
+        }
+        else
+        {
+        selected = 1;
+        }
+        inventoryMenu();
+    }
+    else if (pressed.Key == ConsoleKey.Enter)
+    {
+        if (selected < 5)
+        {
+            if (selected == 1)
+            {
+                if (Convert.ToInt32(inventory.slot1.Substring(inventory.slot1.Length-1)) > 0)
+                {
+                inventory.slot1 = inventory.slot1.Substring(0,inventory.slot1.Length-1)+(Convert.ToInt32(inventory.slot1.Substring(inventory.slot1.Length-1))-1);
+                }
+            }
+            else if (selected == 2)
+            {
+                if (Convert.ToInt32(inventory.slot2.Substring(inventory.slot2.Length-1)) > 0)
+                {
+                inventory.slot2 = inventory.slot2.Substring(0,inventory.slot2.Length-1)+(Convert.ToInt32(inventory.slot2.Substring(inventory.slot2.Length-1))-1);
+                }
+            }
+            else if (selected == 3)
+            {
+                if (Convert.ToInt32(inventory.slot3.Substring(inventory.slot3.Length-1)) > 0)
+                {
+                inventory.slot3 = inventory.slot3.Substring(0,inventory.slot3.Length-1)+(Convert.ToInt32(inventory.slot3.Substring(inventory.slot3.Length-1))-1);
+                }   
+            }
+            else if (selected == 4)
+            {
+                if (Convert.ToInt32(inventory.slot4.Substring(inventory.slot4.Length-1)) > 0)
+                {
+                inventory.slot4 = inventory.slot4.Substring(0,inventory.slot4.Length-1)+(Convert.ToInt32(inventory.slot4.Substring(inventory.slot4.Length-1))-1);
+                }
+            }
+            inventoryMenu();
+        }
+    }
+    else
+    {
+        inventoryMenu();
+    }
+}
 
 void shop(int x)
 {
 switch (x)
 {
 case 1:
-item=("Doce",15,3);
+item=("Doce",15,3,5);
 break;
 case 2:
-item=("A",1,1);
+item=("A",1,1,1);
 break;
 case 3:
-item=("B",0,0);
+item=("B",0,0,0);
 break;
 case 4:
-item=("E",666,6);
+item=("E",666,6,6);
 break;
 default:
+item=("",0,0,0);
 break;
 }
 }
@@ -711,7 +861,7 @@ void status_math() // taken or does damage math
         def_dmg = 3;
     }
 }
-void loop() // actions: [A] attack, [D] defend or [S] luck
+void loop() // actions: [A] attack, [D] defend, [S] luck or [I] item
 {
 if (firstEncounter == false)
 {
@@ -746,6 +896,8 @@ Console.ForegroundColor = ConsoleColor.DarkGray;
 Console.WriteLine("│ Ⓓ efender              │");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
 Console.WriteLine("│ Ⓢ orte                 │");
+Console.ForegroundColor = ConsoleColor.Green;
+//Console.WriteLine("│ Ⓘ tem                  │");
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("╚────────────────────────╝"); // end of action box
 action = Console.ReadLine()!;
@@ -770,15 +922,14 @@ if (action.Trim().ToLower().Substring(0,1) == "s") // luck test
             Console.ForegroundColor = ConsoleColor.Green;
             textDialog("Sortudo\n",45);
             luck_mode = "lucky";
-            loaded();
         }
         else if (luck_Test > you.lu)
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
             textDialog("Azarado\n",45);
             luck_mode = "unlucky";
-            loaded();
         }
+        loaded();
         you.lu -= 1;
     }
     else if (hp > 0 && luck_mode != "") // if you arealdy have tested luck
@@ -849,6 +1000,15 @@ else if (action.Trim().ToLower().Substring(0,1) == "d") // defend action
         loaded();
     }
 }
+/*else if (action.Trim().ToLower().Substring(0,1) == "i") // item action
+{
+    if (hp > 0)
+    {
+        inventoryMenu();
+        morte();
+        loaded();
+    }
+}*/
 }
 
 void turns() // battle stats + loop
@@ -919,7 +1079,11 @@ else if (hp > 0 && stage <= finalStage) // when you still alive and enemy too, t
     turns();
 }
 }
-//shopDesign("Doce","A","B","E"); still on Beta
+shopMenu.option1 = 1;
+shopMenu.option2 = 2;
+shopMenu.option3 = 3;
+shopMenu.option4 = 4;
+//shopDesign();
 secretEncounter();
 updt(); // first monster update status
 turns(); // begin of battle
