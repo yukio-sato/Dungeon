@@ -167,7 +167,7 @@ void buy(string food)
     }
     else if (answer.Trim().ToLower().Substring(0,1) == "n")
     {
-
+        shopDesign();
     }
     else
     {
@@ -246,7 +246,7 @@ void shopDesign()
         }
         shopDesign();
     }
-    else if (pressed.Key == ConsoleKey.Enter)
+    if (pressed.Key == ConsoleKey.Enter)
     {
         if (selected < 5)
         {
@@ -262,8 +262,12 @@ void shopDesign()
 
 void slotDesign(string food,int slotSpace)
 {
-    string foodName = food.Substring(0,food.Length-2);
-    int autoSize = 10-(foodName.Length/2);
+    string foodName = "──";
+    if (food.Length > 2)
+    {
+    foodName = food.Substring(0,food.Length-2);
+    }
+    int autoSize = 4-(foodName.Length/2);
     if ((slotSpace % 2) == 0)
     {
         if (slotSpace == selected)
@@ -295,12 +299,12 @@ void slotDesign(string food,int slotSpace)
         if (slotSpace == selected)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine($"{"".PadLeft(7,' ')}[Exit]{"".PadRight(7,' ')}");
+            Console.WriteLine($"{"".PadLeft(5,' ')}[Exit]{"".PadRight(5,' ')}");
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"{"".PadLeft(8,' ')}Exit{"".PadRight(8,' ')}");  
+            Console.WriteLine($"{"".PadLeft(6,' ')}Exit{"".PadRight(6,' ')}");  
         } 
     }
 }
@@ -321,7 +325,7 @@ void inventoryMenu()
     Console.WriteLine($"{gold} Gold");
 
        ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
-    if (pressed.Key == ConsoleKey.UpArrow)
+    if (pressed.Key == ConsoleKey.LeftArrow)
     {
         if (selected > 1)
         {
@@ -333,7 +337,7 @@ void inventoryMenu()
         }
         inventoryMenu();
     }
-    else if (pressed.Key == ConsoleKey.DownArrow)
+    else if (pressed.Key == ConsoleKey.RightArrow)
     {
         if (selected < 5)
         {
@@ -345,32 +349,56 @@ void inventoryMenu()
         }
         inventoryMenu();
     }
+    else if (pressed.Key == ConsoleKey.UpArrow)
+    {
+        if (selected > 2)
+        {
+        selected -= 2;
+        }
+        else
+        {
+        selected = selected+3;
+        }
+        inventoryMenu();
+    }
+    else if (pressed.Key == ConsoleKey.DownArrow)
+    {
+        if (selected < 3)
+        {
+        selected += 2;
+        }
+        else
+        {
+        selected = 5;
+        }
+        inventoryMenu();
+    }
     else if (pressed.Key == ConsoleKey.Enter)
     {
         if (selected < 5)
         {
-            if (selected == 1)
+            if (selected == 1 && inventory.slot1 != "─")
             {
                 if (Convert.ToInt32(inventory.slot1.Substring(inventory.slot1.Length-1)) > 0)
                 {
                 inventory.slot1 = inventory.slot1.Substring(0,inventory.slot1.Length-1)+(Convert.ToInt32(inventory.slot1.Substring(inventory.slot1.Length-1))-1);
                 }
             }
-            else if (selected == 2)
+            else if (selected == 2 && inventory.slot2 != "─")
             {
                 if (Convert.ToInt32(inventory.slot2.Substring(inventory.slot2.Length-1)) > 0)
                 {
                 inventory.slot2 = inventory.slot2.Substring(0,inventory.slot2.Length-1)+(Convert.ToInt32(inventory.slot2.Substring(inventory.slot2.Length-1))-1);
                 }
             }
-            else if (selected == 3)
+            else if (selected == 3 && inventory.slot3 != "─")
             {
                 if (Convert.ToInt32(inventory.slot3.Substring(inventory.slot3.Length-1)) > 0)
                 {
                 inventory.slot3 = inventory.slot3.Substring(0,inventory.slot3.Length-1)+(Convert.ToInt32(inventory.slot3.Substring(inventory.slot3.Length-1))-1);
                 }   
             }
-            else if (selected == 4)
+            else if (selected == 4 && inventory.slot4 != "─")
             {
                 if (Convert.ToInt32(inventory.slot4.Substring(inventory.slot4.Length-1)) > 0)
                 {
@@ -896,7 +924,7 @@ Console.ForegroundColor = ConsoleColor.DarkGray;
 Console.WriteLine("│ Ⓓ efender              │");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
 Console.WriteLine("│ Ⓢ orte                 │");
-Console.ForegroundColor = ConsoleColor.Green;
+Console.ForegroundColor = ConsoleColor.DarkYellow;
 //Console.WriteLine("│ Ⓘ tem                  │");
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("╚────────────────────────╝"); // end of action box
@@ -1006,7 +1034,6 @@ else if (action.Trim().ToLower().Substring(0,1) == "d") // defend action
     {
         inventoryMenu();
         morte();
-        loaded();
     }
 }*/
 }
