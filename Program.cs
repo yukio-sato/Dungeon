@@ -14,7 +14,7 @@ secretEcounter = false;
 var you=(name: "",hp: 0,at: 0,lu: 0,lv: 1,exp: 0, gold: 0); // [1] Name, [2] HP, [3] ATK, [4] LUCK, [5] LV, [6] EXP
 var enemy=(name: "",hp: 0,at: 0,lv: 0); // [1] Name, [2] HP, [3] ATK, [4] LV
 var narrador=(act1: "",act2: "",act3: "",act4: ""); // [1] Interactions, [2] Interactions, [3] Interactions, [4] Interactions
-var item=(name: "",cost: 0, max: 0,heal: 0); // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal
+var item=(name: "",cost: 0, max: 0,heal: 0,at: 0,lu: 0,desc: ""); // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck , [7] Description
 var inventory=(slot1: "─", slot2: "─", slot3: "─", slot4: "─"); // Player Inventory Slots
 var foodId=(food1: 0, food2: 0, food3: 0, food4: 0); // Player Food ID
 var shopMenu=(option1: 0, option2: 0, option3: 0, option4: 0); // Shop placeholder slots
@@ -33,7 +33,8 @@ heartLength = 5, // the number of character of Heart Bar
 interactNumber = 0, // random number for interact
 next = 25, // exp modify for next love
 xpMath = 10 + (next*(you.lv - 1)), // math of next exp for love
-selected = 1, // selected
+selected = 1, // selected on inventory/shop
+foodLength = 6, // item Length for dice
 gold = 0; // player gold
 
 void secretEncounter()
@@ -41,7 +42,7 @@ void secretEncounter()
 encounter = dice(1,100,0);
 stage++;
 secretEcounter = false;
-if (encounter <= 25) // chance for YOU?
+if (encounter <= 5) // chance for YOU?
 {
     secretEcounter = true;
     secret = 0;
@@ -56,6 +57,12 @@ shopMenu.option3 = opt3;
 shopMenu.option4 = opt4;
 onShop = true;
 shopDesign();
+}
+
+void randomBar()
+{
+Console.ForegroundColor = ConsoleColor.DarkGray;
+Console.Write(" | ");
 }
 
 void FoodInventory(string food, int Id)
@@ -118,8 +125,7 @@ void FoodInventory(string food, int Id)
         Console.ReadKey();
         shopDesign();
     }
-    Console.WriteLine(inventory);
-    Console.ReadKey();
+    //Console.WriteLine(inventory); // Enable it if you wanna see inventory after buying
     shopDesign();
 }
 string inventoryVerify(string food)
@@ -156,7 +162,7 @@ void buy(string food, int id)
     }
     if (answer.Trim().ToLower().Substring(0,1) == "s")
     {
-        if (gold >= item.cost && (inventoryVerify(food) == "─" || Convert.ToInt32(inventoryVerify(food).Substring(food.Length+1)) < item.max))
+        if (gold >= item.cost && ((inventoryVerify(food) == "─" && item.max > 0) || Convert.ToInt32(inventoryVerify(food).Substring(food.Length+1)) < item.max))
         {
             FoodInventory(food,id);
         }
@@ -198,7 +204,14 @@ if (slot == selected)
     Console.ForegroundColor = ConsoleColor.DarkYellow;
     if (slot < 5)
     {
+    if (item.name != "")
+    {
     Console.WriteLine($"[{item.name}]{"".PadRight(8-(item.name.Length+item.cost.ToString().Length),'.')}{item.cost} Gold");
+    }
+    else
+    {
+    Console.WriteLine($"{item.name.PadRight(15,'.')}");        
+    }
     }
     else
     {
@@ -210,7 +223,14 @@ else
     Console.ForegroundColor = ConsoleColor.Gray;
     if (slot < 5)
     {
+    if (item.name != "")
+    {
     Console.WriteLine($"{item.name.PadRight(10-item.cost.ToString().Length,'.')}{item.cost} Gold");  
+    }
+    else
+    {
+    Console.WriteLine($"{item.name.PadRight(15,'.')}");        
+    }
     }
     else
     {
@@ -238,7 +258,6 @@ void shopDesign()
     Console.WriteLine("'=───────────='");
     Console.ForegroundColor = ConsoleColor.DarkYellow;
     Console.WriteLine($"{gold} Gold");
-
 
     ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
     if (pressed.Key == ConsoleKey.Enter)
@@ -313,7 +332,7 @@ void slotDesign(string food,int slotSpace)
     {
         food = "..─0";
     }
-    int autoSize = 4-(foodName.Length/2);
+    int autoSize = 6-(foodName.Length/2);
     if ((slotSpace % 2) == 0)
     {
         if (slotSpace == selected)
@@ -345,34 +364,67 @@ void slotDesign(string food,int slotSpace)
         if (slotSpace == selected)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine($"{"".PadLeft(5,' ')}[Exit]{"".PadRight(5,' ')}");
+            Console.WriteLine($"{"".PadLeft(7,' ')}[Exit]{"".PadRight(7,' ')}");
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"{"".PadLeft(6,' ')}Exit{"".PadRight(6,' ')}");  
+            Console.WriteLine($"{"".PadLeft(8,' ')}Exit{"".PadRight(8,' ')}");  
         } 
     }
 }
 
 void foodHeal()
 {
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    textDialog($"Consumiu {item.name}!\n",25);
+    Console.ForegroundColor = ConsoleColor.White;
+    textDialog(item.desc+"\n",25);
     Console.ForegroundColor = ConsoleColor.Green;
     if ((player_hp + item.heal) < player_hp)
     {
     Console.ForegroundColor = ConsoleColor.Red;
-    textDialog($"Consumiu {item.name}!\n Perdeu {item.heal}!\n",25);
+    textDialog($"Perdeu {item.heal} HP!\n",25);
     player_hp += item.heal;
+    if (player_hp <= 0)
+    {
+        Console.Clear();
+        onInventory = false;
+    }
     }
     else if ((player_hp + item.heal) < you.hp)
     {
-    textDialog($"Consumiu {item.name}!\n Recuperou {item.heal}\n!",25);
+    textDialog($"Recuperou {item.heal} HP!\n",25);
     player_hp += item.heal;
     }
     else if ((player_hp + item.heal) >= you.hp)
     {
-    textDialog($"Consumiu {item.name}!\nMaximixou seu HP!\n",25);
+    textDialog($"Maximixou seu HP!\n",25);
     player_hp = you.hp;
+    }
+
+    Console.ForegroundColor = ConsoleColor.DarkRed;
+    you.at += item.at;
+    if ((you.at + item.at) < you.at)
+    {
+    Console.ForegroundColor = ConsoleColor.Red;
+    textDialog($"Perdeu {item.at} AT!\n",25);
+    }
+    if ((you.at + item.at) > you.at)
+    {
+    textDialog($"Ganhou {item.at} AT!\n",25);
+    }
+
+    Console.ForegroundColor = ConsoleColor.DarkGreen;
+    you.lu += item.lu;
+    if ((you.lu + item.lu) < you.lu)
+    {
+    Console.ForegroundColor = ConsoleColor.Red;
+    textDialog($"Perdeu {item.lu} LU!\n",25);
+    }
+    if ((you.lu + item.lu) > you.lu)
+    {
+    textDialog($"Ganhou {item.lu} LU!\n",25);
     }
     loaded();
 }
@@ -396,14 +448,14 @@ void inventoryMenu()
     Console.ForegroundColor = ConsoleColor.DarkGreen;
     Console.WriteLine($" LU {you.lu}✤\n");
     Console.ForegroundColor = ConsoleColor.DarkGray;
-    Console.WriteLine(".=─────{Item}─────=.");
+    Console.WriteLine(".=───────{Item}───────=.");
     slotDesign(inventory.slot1,1);
     slotDesign(inventory.slot2,2);
     slotDesign(inventory.slot3,3);
     slotDesign(inventory.slot4,4);
     slotDesign("Exit",5);
     Console.ForegroundColor = ConsoleColor.DarkGray;
-    Console.WriteLine("'=────────────────='");
+    Console.WriteLine("'=────────────────────='");
 
     ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
     if (pressed.Key == ConsoleKey.Enter)
@@ -525,22 +577,22 @@ void inventoryMenu()
 
 void shop(int x)
 {
-switch (x)
+switch (x) // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck, [7] Description
 {
 case 1:
-item=("Doce",15,3,5);
+item=("Durex",5,5,3,0,0,"✶ Você remenda seus ferimentos.\n✶ Parabéns por não morrer até agora!");
 break;
 case 2:
-item=("A",1,1,1);
+item=("Veneno",3,1,-6,-1,10,"✶ Você decide tomar o Veneno. . .\n✶ Alguma coisa não caiu bem.");
 break;
 case 3:
-item=("B",0,0,-5);
+item=("Vita╴",30,2,4,4,-2,"✶ Você espera a luz do Sol!\n✶ Vitamina A deixou você refrescado!");
 break;
 case 4:
-item=("E",666,6,6);
+item=("Trevo",12,4,0,0,4,"✶ Bem me quer, Mal me quer.\n✶ Bem me quer, Mal me quer. . .");
 break;
 default:
-item=("",0,0,0);
+item=("",0,0,0,0,0,"");
 break;
 }
 }
@@ -577,7 +629,7 @@ int xpMonsterMath() // xp math with monster lv when kill
 }
 int gMonster() // g with monster lv when kill
 {
-    int golden = dice(0,10,0) + (3*(enemy.lv - 1));
+    int golden = dice(1,10,0) + (3*(enemy.lv - 1));
     return golden;
 }
 
@@ -891,7 +943,7 @@ void counterCheck() // when you defend check if you counter the attack or not
     Console.ForegroundColor = ConsoleColor.Cyan;
     if (atk_Test >= you.at)
     {
-    hp = hp - (atk_dmg-1);
+    hp -= (atk_dmg-1);
     textDialog($"➹ {you.name} Contra-ataca!\n",25);
     dmgSound("Player");
     Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -900,7 +952,7 @@ void counterCheck() // when you defend check if you counter the attack or not
     }
     else if (atk_Test < you.at)
     {
-    player_hp = player_hp - (def_dmg-1);
+    player_hp -= (def_dmg-1);
     textDialog($"➹ {you.name} Bloqueiou!\n",25);
     dmgSound("Monster");
     Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -953,9 +1005,9 @@ void morte()
         Console.ForegroundColor = ConsoleColor.Red;
         textDialog($"✝ {enemy.name} foi derrotado! ✝\n", 25);
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        textDialog($"{you.name} ganhou {gMonster()} de Gold!\n",25);
+        textDialog($"{you.name} ganhou {g} de Gold!\n",25);
         Console.ForegroundColor = ConsoleColor.White;
-        textDialog($"{you.name} ganhou {xpMonsterMath()} de EXP!\n",25);
+        textDialog($"{you.name} ganhou {xp} de EXP!\n",25);
         Levelviolence();
         for (int i = 0; i < 4; i++)
         {
@@ -968,7 +1020,9 @@ void morte()
         Console.ForegroundColor = ConsoleColor.DarkGray;
         textDialog($"{enemy.name} foi apagado. . .\n", 105);
         Console.ForegroundColor = ConsoleColor.Gray;
-        textDialog($"{you.name} substituiu, ganhando {xpMonsterMath()} de EXP.\n",25);
+        textDialog($"{you.name} substituiu, ganhando {g} de Gold.\n",25);
+        Console.ForegroundColor = ConsoleColor.Gray;
+        textDialog($"Contudo, ganhou {xp} de EXP.\n",25);
         Levelviolence();
         for (int i = 0; i < 4; i++)
         {
@@ -1034,8 +1088,6 @@ switch (interactNumber)
         textDialog("✶ "+narrador.act4+"\n",2);
     break;
 }
-Console.ForegroundColor = ConsoleColor.DarkYellow;
-Console.WriteLine($"{gold} Gold");
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("╔─── Ações ──────────────╗");// begin of action box
 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1161,7 +1213,6 @@ else if (action.Trim().ToLower().Substring(0,1) == "i") // item action
 
 void turns() // battle stats + loop
 {
-Console.Clear();
 // --------------------------------------Monster-----------------------------------------
 if (secretEcounter == false)
 {
@@ -1171,11 +1222,15 @@ else if (secretEcounter == true)
 {
 Console.ForegroundColor = ConsoleColor.Black;
 }
+Console.Clear();
 bar(hp,enemy.hp,"Monster");
 monHL = 14-enemy.name.Length/2;
 Console.WriteLine("「".PadLeft((monHL),'▁')+enemy.name+"」".PadRight((monHL),'▁'));
 Console.ForegroundColor = ConsoleColor.White;
-Console.WriteLine(" LV "+enemy.lv.ToString().PadLeft(2,' ')+"  EXP ?/?");
+Console.Write(" LV "+enemy.lv.ToString().PadLeft(2,' '));
+randomBar();
+Console.ForegroundColor = ConsoleColor.White;
+Console.WriteLine("EXP ?/?");
 Console.ForegroundColor = ConsoleColor.Green;
 Console.Write($" HP {hpbar} {hp.ToString().PadLeft(2,'0')}/{enemy.hp.ToString().PadLeft(2,'0')}");
 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1189,7 +1244,13 @@ plaHL = 14-you.name.Length/2;
 Console.WriteLine("「".PadLeft((plaHL),'▁')+you.name+"」".PadRight((plaHL),'▁'));
 Console.ForegroundColor = ConsoleColor.White;
 Levelviolence();
-Console.WriteLine(" LV "+you.lv.ToString().PadLeft(2,' ')+$" EXP {you.exp}/{xpMath}");
+Console.Write(" LV "+you.lv.ToString().PadLeft(2,' '));
+randomBar();
+Console.ForegroundColor = ConsoleColor.White;
+Console.Write($"EXP {you.exp}/{xpMath}");
+randomBar();
+Console.ForegroundColor = ConsoleColor.DarkYellow;
+Console.WriteLine($"{gold} Gold");
 Console.ForegroundColor = ConsoleColor.Green;
 Console.Write($" HP {playerhpbar} {player_hp.ToString().PadLeft(2,'0')}/{you.hp.ToString().PadLeft(2,'0')}");
 Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1202,7 +1263,7 @@ if (hp <= 0 && stage < finalStage) // stage/floor increase when monster die
     secretEncounter();
     firstEncounter = true;
     updt();
-    shopCall(1,0,0,0);
+    shopCall(dice(1,foodLength,-1),dice(1,foodLength,-1),dice(1,foodLength,-1),dice(1,foodLength,-1));
     turns();
 }
 else if (player_hp <= 0) // when player die
@@ -1225,6 +1286,7 @@ else if (player_hp <= 0) // when player die
 }
 else if (hp > 0 && stage <= finalStage) // when you still alive and enemy too, then repeat
 {
+    Console.Clear();
     turns();
 }
 }
