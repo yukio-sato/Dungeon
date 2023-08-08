@@ -14,7 +14,7 @@ secretEcounter = false;
 var you=(name: "",hp: 0,at: 0,lu: 0,lv: 1,exp: 0, gold: 0); // [1] Name, [2] HP, [3] ATK, [4] LUCK, [5] LV, [6] EXP
 var enemy=(name: "",hp: 0,at: 0,lv: 0); // [1] Name, [2] HP, [3] ATK, [4] LV
 var narrador=(act1: "",act2: "",act3: "",act4: ""); // [1] Interactions, [2] Interactions, [3] Interactions, [4] Interactions
-var item=(name: "",cost: 0, max: 0,heal: 0,at: 0,lu: 0,desc: ""); // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck , [7] Description
+var item=(name: "",cost: 0, max: 0,heal: 0,at: 0,lu: 0,desc: "",chance: 0); // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck , [7] Description , [8] Shop Chance
 var inventory=(slot1: "─", slot2: "─", slot3: "─", slot4: "─"); // Player Inventory Slots
 var foodId=(food1: 0, food2: 0, food3: 0, food4: 0); // Player Food ID
 var shopMenu=(option1: 0, option2: 0, option3: 0, option4: 0); // Shop placeholder slots
@@ -34,8 +34,12 @@ interactNumber = 0, // random number for interact
 next = 25, // exp modify for next love
 xpMath = 10 + (next*(you.lv - 1)), // math of next exp for love
 selected = 1, // selected on inventory/shop
-foodLength = 6, // item Length for dice
-gold = 0; // player gold
+foodLength = 6, // item max Length
+gold = 0, // player gold
+shopSlot1 = 0, // Selected food on shop
+shopSlot2 = 0, // Selected food on shop
+shopSlot3 = 0, /// Selected food on shop
+shopSlot4 = 0; // Selected food on shop
 
 void secretEncounter()
 {
@@ -577,22 +581,22 @@ void inventoryMenu()
 
 void shop(int x)
 {
-switch (x) // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck, [7] Description
+switch (x) // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck, [7] Description, [8] Shop Chance
 {
 case 1:
-item=("Durex",5,5,3,0,0,"✶ Você remenda seus ferimentos.\n✶ Parabéns por não morrer até agora!");
+item=("Durex",5,5,3,0,0,"✶ Você remenda seus ferimentos.\n✶ Parabéns por não morrer até agora!",50);
 break;
 case 2:
-item=("Veneno",3,1,-6,-1,10,"✶ Você decide tomar o Veneno. . .\n✶ Alguma coisa não caiu bem.");
+item=("Veneno",3,1,-6,-1,10,"✶ Você decide tomar o Veneno. . .\n✶ Alguma coisa não caiu bem.",20);
 break;
 case 3:
-item=("Vita╴",30,2,4,4,-2,"✶ Você espera a luz do Sol!\n✶ Vitamina A deixou você refrescado!");
+item=("Vita╴",30,2,4,4,-2,"✶ Você espera a luz do Sol!\n✶ Vitamina A deixou você refrescado!",35);
 break;
 case 4:
-item=("Trevo",12,4,0,0,4,"✶ Bem me quer, Mal me quer.\n✶ Bem me quer, Mal me quer. . .");
+item=("Trevo",12,4,0,0,4,"✶ Bem me quer, Mal me quer.\n✶ Bem me quer, Mal me quer. . .",44);
 break;
 default:
-item=("",0,0,0,0,0,"");
+item=("",0,0,0,0,0,"",100);
 break;
 }
 }
@@ -605,7 +609,7 @@ void Levelviolence() // love for every kill you do
         you.exp -= xpMath;
         you.lv++;
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        textDialog($"{you.name} subiu de LV {you.lv-1} > {you.lv}!\n",25);
+        textDialog($"\"{you.name}\" subiu de LV {you.lv-1} > {you.lv}!\n",25);
         if (you.lv % 4 == 0)
         {
         player_hp += 1;
@@ -905,7 +909,7 @@ switch (stage)
     narrador=(
         $"O ambiente começa a ficar mais tenso. . .",
         $"O cemitério.\n✶ Os ventos.\n* Te incomodam. . .",
-        $"A aventura de {you.name} chegou ao fim. . .",
+        $"A aventura de \"{you.name}\" chegou ao fim. . .",
         $"Você só queria terminar essa Masmorra. . ."
     );
     break;
@@ -944,7 +948,7 @@ void counterCheck() // when you defend check if you counter the attack or not
     if (atk_Test >= you.at)
     {
     hp -= (atk_dmg-1);
-    textDialog($"➹ {you.name} Contra-ataca!\n",25);
+    textDialog($"➹ \"{you.name}\" Contra-ataca!\n",25);
     dmgSound("Player");
     Console.ForegroundColor = ConsoleColor.DarkRed;
     textDialog($"♡ {enemy.name} perdeu {atk_dmg-1} HP\n",12);
@@ -953,10 +957,10 @@ void counterCheck() // when you defend check if you counter the attack or not
     else if (atk_Test < you.at)
     {
     player_hp -= (def_dmg-1);
-    textDialog($"➹ {you.name} Bloqueiou!\n",25);
+    textDialog($"➹ \"{you.name}\" Bloqueiou!\n",25);
     dmgSound("Monster");
     Console.ForegroundColor = ConsoleColor.DarkRed;
-    textDialog($"♡ {you.name} perdeu {def_dmg-1} HP\n",12);
+    textDialog($"♡ \"{you.name}\" perdeu {def_dmg-1} HP\n",12);
     dmgSound("");
     }
 }
@@ -967,7 +971,7 @@ void morte()
     {
         player_hp = 0;
         Console.ForegroundColor = ConsoleColor.DarkGray;
-        textDialog($"✝ {you.name} caiu! ✝",25);
+        textDialog($"✝ \"{you.name}\" caiu! ✝",25);
         textDialog(" . . . ➟\n",125);
         for (int i = 0; i < 4; i++)
         {
@@ -1005,9 +1009,9 @@ void morte()
         Console.ForegroundColor = ConsoleColor.Red;
         textDialog($"✝ {enemy.name} foi derrotado! ✝\n", 25);
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        textDialog($"{you.name} ganhou {g} de Gold!\n",25);
+        textDialog($"\"{you.name}\" ganhou {g} de Gold!\n",25);
         Console.ForegroundColor = ConsoleColor.White;
-        textDialog($"{you.name} ganhou {xp} de EXP!\n",25);
+        textDialog($"\"{you.name}\" ganhou {xp} de EXP!\n",25);
         Levelviolence();
         for (int i = 0; i < 4; i++)
         {
@@ -1020,7 +1024,7 @@ void morte()
         Console.ForegroundColor = ConsoleColor.DarkGray;
         textDialog($"{enemy.name} foi apagado. . .\n", 105);
         Console.ForegroundColor = ConsoleColor.Gray;
-        textDialog($"{you.name} substituiu, ganhando {g} de Gold.\n",25);
+        textDialog($"\"{you.name}\" substituiu, ganhando {g} de Gold.\n",25);
         Console.ForegroundColor = ConsoleColor.Gray;
         textDialog($"Contudo, ganhou {xp} de EXP.\n",25);
         Levelviolence();
@@ -1034,7 +1038,7 @@ void morte()
         {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Clear();
-        textDialog($"❚ ❚ {you.name} matou todos os monstros! ❚ ❚\n",25);
+        textDialog($"❚ ❚ \"{you.name}\" matou todos os monstros! ❚ ❚\n",25);
         Console.Beep(1250,400);
         Console.Beep(750,400);
         Console.Beep(1250,400);
@@ -1112,7 +1116,7 @@ if (action.Trim().ToLower().Substring(0,1) == "s") // luck test
     if (hp > 0 && luck_mode == "") // if you didn't tested you luck yet
     {
         Console.ForegroundColor = ConsoleColor.DarkGreen;
-        textDialog($"✤ {you.name} testou a Sorte!\n",25);
+        textDialog($"✤ \"{you.name}\" testou a Sorte!\n",25);
         luck_Test = dice(2,6,0);
         for (int i = 0; i < 4; i++)
         {
@@ -1154,7 +1158,7 @@ if (action.Trim().ToLower().Substring(0,1) == "a") // attack action
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             hp -= atk_dmg;
-            textDialog($"➹ {you.name} Ataca!\n",25);
+            textDialog($"➹ \"{you.name}\" Ataca!\n",25);
             dmgSound("Player");
             Console.ForegroundColor = ConsoleColor.DarkRed;
             textDialog($"♡ {enemy.name} perdeu {atk_dmg} HP\n",12);
@@ -1167,7 +1171,7 @@ if (action.Trim().ToLower().Substring(0,1) == "a") // attack action
             textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
             dmgSound("Monster");
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            textDialog($"♡ {you.name} perdeu {def_dmg} HP\n",12);
+            textDialog($"♡ \"{you.name}\" perdeu {def_dmg} HP\n",12);
             dmgSound("");
         }
         else if (atk_Test == def_Test)
@@ -1255,7 +1259,7 @@ else if (action.Trim().ToLower().Substring(0,1) == "r") // item action
                 textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
                 dmgSound("Monster");
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                textDialog($"♡ {you.name} perdeu {def_dmg} HP\n",12);
+                textDialog($"♡ \"{you.name}\" perdeu {def_dmg} HP\n",12);
                 dmgSound("");
             }
         }
@@ -1317,7 +1321,42 @@ if (hp <= 0 && stage < finalStage) // stage/floor increase when monster die
     secretEncounter();
     firstEncounter = true;
     updt();
-    shopCall(dice(1,foodLength,-1),dice(1,foodLength,-1),dice(1,foodLength,-1),dice(1,foodLength,-1));
+    shopSlot1 = 0;
+    shopSlot2 = 0;
+    shopSlot3 = 0;
+    shopSlot4 = 0;
+    for (int i = 0; i <= foodLength; i++)
+    {
+        int foodDice = dice(1,foodLength,-1);
+        shop(foodDice);
+        int foodChance = dice(1,100,0);  
+        if (foodChance <= item.chance)
+        {
+            if (shopSlot1 != foodDice && shopSlot2 != foodDice && shopSlot3 != foodDice && shopSlot4 != foodDice)
+            {
+                if (shopSlot1 == 0)
+                {
+                    shopSlot1 = foodDice;
+                }
+                else if (shopSlot2 == 0)
+                {
+                    shopSlot2 = foodDice;
+                }
+                else if (shopSlot3 == 0)
+                {
+                    shopSlot3 = foodDice;
+                }
+                else if (shopSlot4 == 0)
+                {
+                    shopSlot4 = foodDice;
+                }
+            }
+        }
+    }
+    if (shopSlot1 != 0 && shopSlot2 != 0 && shopSlot2 != 0 && shopSlot3 != 0 && shopSlot4 != 0)
+    {
+    shopCall(shopSlot1,shopSlot2,shopSlot3,shopSlot4);
+    }
     turns();
 }
 else if (player_hp <= 0) // when player die
