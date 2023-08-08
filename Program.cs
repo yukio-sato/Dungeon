@@ -42,7 +42,7 @@ void secretEncounter()
 encounter = dice(1,100,0);
 stage++;
 secretEcounter = false;
-if (encounter <= 5) // chance for YOU?
+if (encounter <= 15) // chance for YOU?
 {
     secretEcounter = true;
     secret = 0;
@@ -1092,12 +1092,14 @@ Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("╔─── Ações ──────────────╗");// begin of action box
 Console.ForegroundColor = ConsoleColor.DarkRed;
 Console.WriteLine("│ Ⓐ tacar                │");
-Console.ForegroundColor = ConsoleColor.DarkGray;
+Console.ForegroundColor = ConsoleColor.DarkCyan;
 Console.WriteLine("│ Ⓓ efender              │");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
 Console.WriteLine("│ Ⓢ orte                 │");
 Console.ForegroundColor = ConsoleColor.DarkYellow;
 Console.WriteLine("│ Ⓘ tem                  │");
+Console.ForegroundColor = ConsoleColor.DarkGray;
+Console.WriteLine("│ Ⓡ un                   │");
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("╚────────────────────────╝"); // end of action box
 action = Console.ReadLine()!;
@@ -1151,7 +1153,7 @@ if (action.Trim().ToLower().Substring(0,1) == "a") // attack action
         if (atk_Test > def_Test)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            hp = hp - atk_dmg;
+            hp -= atk_dmg;
             textDialog($"➹ {you.name} Ataca!\n",25);
             dmgSound("Player");
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1161,7 +1163,7 @@ if (action.Trim().ToLower().Substring(0,1) == "a") // attack action
         else if (atk_Test < def_Test)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            player_hp = player_hp - def_dmg;
+            player_hp -= def_dmg;
             textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
             dmgSound("Monster");
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1206,6 +1208,58 @@ else if (action.Trim().ToLower().Substring(0,1) == "i") // item action
     {
         onInventory = true;
         inventoryMenu();
+        morte();
+    }
+}
+else if (action.Trim().ToLower().Substring(0,1) == "r") // item action
+{
+    if (hp > 0)
+    {
+        int player_run = dice(2,6,player_hp);
+        int enemy_run = dice(2,6,hp);
+        for (int i = 0; i < 4; i++)
+        {
+        Console.Beep(850,450);
+        }
+        if (player_run >= enemy_run)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            textDialog($"Você conseguiu fugir do {enemy.name}!\n",25);
+            if (stage > 1 && secretEcounter == false)
+            {
+            int choosing = dice(1,2,0);
+            if (choosing%2 == 0)
+            {
+            stage -= 2;
+            }
+            secretEncounter();
+            updt();
+            }
+            else
+            {
+            textDialog($"Mas não tem onde para fugir. . .\n",25);
+            }
+        }
+        else if (player_run < enemy_run)
+        {
+            Console.ForegroundColor = ConsoleColor.Gray;
+            textDialog($"Você falha em fugir do {enemy.name}. . .\n",25);
+             status_math();
+            luck_mode = "";
+            atk_Test = you.at + dice(1,6,0);
+            def_Test = enemy.at + dice(2,6,0);
+            if (atk_Test <= def_Test)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                player_hp -= def_dmg;
+                textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
+                dmgSound("Monster");
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                textDialog($"♡ {you.name} perdeu {def_dmg} HP\n",12);
+                dmgSound("");
+            }
+        }
+        loaded();
         morte();
     }
 }
@@ -1270,7 +1324,7 @@ else if (player_hp <= 0) // when player die
 {
     Console.Clear();
     Console.ForegroundColor = ConsoleColor.White;
-    textDialog("\n\nˣ GAME OVER ˣ\n",125);
+    textDialog("ˣ GAME OVER ˣ\n",125);
     Thread.Sleep(500);
     Console.Clear();
     for (int i = 0; i < 6; i++)
