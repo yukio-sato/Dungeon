@@ -63,7 +63,7 @@ if (encounter <= 5) // chance for YOU?
     secretEcounter = true;
     secret = 0;
 }
-else if (encounter <= 10) // chance for Sans
+else if (encounter <= 15) // chance for Sans
 {
     secretEcounter = true;
     secret = 1;
@@ -604,7 +604,7 @@ case 5:
 item=("Café",20,1,you.hp,0,0,"✶ Você bebe o café.\n✶ Você sente-se revigorado!",10);
 break;
 case 6:
-item=("Cereal",8,1,dice(1,you.hp,-1),0,-1,"✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!",25);
+item=("Cereal",8,3,dice(1,you.hp,-1),0,-1,"✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!",75);
 break;
 default:
 item=("",0,0,0,0,0,"",100);
@@ -712,7 +712,7 @@ int dice(int quantity,int maximo, int bns) // random number generator syle RPG C
     return (result+bns); // return all dices values
 }
 
-string soul(int actual, string who) // shorter heart fill
+void soul(int actual, string who) // shorter heart fill
 {
     if (who == "Monster") // if is monster hearts
     {
@@ -732,7 +732,6 @@ string soul(int actual, string who) // shorter heart fill
         }
         playerhpbar = playerhpbar.PadRight(heartLength,'♡'); // fill with void hearts
     }
-    return playerhpbar;
 }
 
 void bar(int now, int max, string who) // Heart Bar
@@ -945,7 +944,7 @@ else if (secretEcounter == true)
     );
     break;
     case 1:
-    enemy=("aaa",1,1,1,15,you.lv+1,2);
+    enemy=("Sans",1,1,1,15,you.lv+1,2);
     narrador=(
         $"Você sente seus pecados \nrastejando em suas costas.",
         $"Você sente que vai \nter um tempo RUIM.",
@@ -955,12 +954,12 @@ else if (secretEcounter == true)
     realStatus = true;
     break;
     case 2:
-    enemy=("socorro",1,1,1,15,you.lv+1,0);
+    enemy=("Sans",1,1,1,15,you.lv+1,0);
     narrador=(
-        $"",
-        $"",
-        $"",
-        $""
+        $"A verdadeira batalha começa.",
+        $"Os ataques se intensificam.",
+        $"Sans prepara algo. . .",
+        $"O espaço-tempo indo \npara lá e para cá."
     );
     realStatus = true;
     break;
@@ -1229,19 +1228,19 @@ switch (interactNumber)
     break;
 }
 Console.ForegroundColor = ConsoleColor.White;
-Console.WriteLine("╔─── Ações ──────────────╗");// begin of action box
+Console.WriteLine("╔─── Ações ──────────────────────╗");// begin of action box
 Console.ForegroundColor = ConsoleColor.DarkRed;
-Console.WriteLine("│ Ⓐ tacar                │");
-Console.ForegroundColor = ConsoleColor.DarkCyan;
-Console.WriteLine("│ Ⓓ efender              │");
+Console.WriteLine("│ Ⓐ tacar                        │");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
-Console.WriteLine("│ Ⓢ orte                 │");
+Console.WriteLine("│ Ⓢ orte                         │");
+Console.ForegroundColor = ConsoleColor.DarkCyan;
+Console.WriteLine("│ Ⓓ efender                      │");
 Console.ForegroundColor = ConsoleColor.DarkYellow;
-Console.WriteLine("│ Ⓘ tem                  │");
+Console.WriteLine("│ Ⓘ tem                          │");
 Console.ForegroundColor = ConsoleColor.DarkGray;
-Console.WriteLine("│ Ⓡ un                   │");
+Console.WriteLine("│ Ⓡ un                           │");
 Console.ForegroundColor = ConsoleColor.White;
-Console.WriteLine("╚────────────────────────╝"); // end of action box
+Console.WriteLine("╚────────────────────────────────╝"); // end of action box
 action = Console.ReadLine()!;
 if (action.Trim() == "") // prevent of break code when used substring();
 {
@@ -1395,7 +1394,7 @@ else
 {
     Console.ForegroundColor = ConsoleColor.Green;
 }
-Console.Write($" HP ");
+Console.Write($"HP ");
 for (int i = 0; i < playerhpbar.Length; i++)
 {
     if ((player_hp-player_kr) < ((i+1)*(you.hp/heartLength)) && player_kr > 0 && playerhpbar[i] == '♥')
@@ -1431,13 +1430,13 @@ plaHL = 14-you.name.Length/2;
 Console.WriteLine("「".PadLeft((plaHL),'▁')+you.name+"」".PadRight((plaHL),'▁'));
 Console.ForegroundColor = ConsoleColor.White;
 Levelviolence();
-Console.Write(" LV "+you.lv.ToString().PadLeft(2,' '));
+Console.Write("LV "+you.lv.ToString().PadRight(3,' '));
 randomBar();
 Console.ForegroundColor = ConsoleColor.White;
-Console.Write($"EXP {you.exp}/{xpMath}");
+Console.Write($"EXP {you.exp.ToString().PadLeft(3,' ')}/{xpMath.ToString().PadRight(3,' ')}");
 randomBar();
 Console.ForegroundColor = ConsoleColor.DarkYellow;
-Console.WriteLine($"{gold} Gold");
+Console.WriteLine($"{gold.ToString().PadLeft(2,' ')} Gold");
 PlayerHPKR();
 Console.ForegroundColor = ConsoleColor.DarkRed;
 Console.Write($" AT {you.at}➶ ");
