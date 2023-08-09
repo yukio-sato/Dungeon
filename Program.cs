@@ -12,7 +12,7 @@ onInventory = false, // inventory detector;
 secretEcounter = false;
 
 var you=(name: "",hp: 0,at: 0,lu: 0,lv: 1,exp: 0, gold: 0); // [1] Name, [2] HP, [3] ATK, [4] LUCK, [5] LV, [6] EXP
-var enemy=(name: "",hp: 0,at: 0,lv: 0); // [1] Name, [2] HP, [3] ATK, [4] LV
+var enemy=(name: "",hp: 0,at: 0,lv: 0,st: 0,kr: 0,lb: 0); // [1] Name, [2] HP, [3] ATK, [4] LV, [5] Stamina,[6] Karma, [7] Linked Battle
 var narrador=(act1: "",act2: "",act3: "",act4: ""); // [1] Interactions, [2] Interactions, [3] Interactions, [4] Interactions
 var item=(name: "",cost: 0, max: 0,heal: 0,at: 0,lu: 0,desc: "",chance: 0); // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck , [7] Description , [8] Shop Chance
 var inventory=(slot1: "─", slot2: "─", slot3: "─", slot4: "─"); // Player Inventory Slots
@@ -23,9 +23,11 @@ int stage = 0, finalStage = 11, // stage settings
 rolled = 1, result, // dice placeholder
 encounter, secret=0, // monster random encounter
 hp, // health actual from monster
+st, // stamina actual from monster
 xp, // xp actual from monster
 g, // gold actual from monster
-player_hp, // health actul from player
+player_hp, // health actual from player
+player_kr = 0, // Karma actual from player
 plaHL, monHL, // monster/player half length math for design
 luck_Test, atk_Test, def_Test, // player/enemy tests
 atk_dmg = 0, def_dmg = 0, // damage player/enemy for atk and def
@@ -50,6 +52,11 @@ if (encounter <= 15) // chance for YOU?
 {
     secretEcounter = true;
     secret = 0;
+}
+else if (encounter <= 100) // chance for Sans
+{
+    secretEcounter = true;
+    secret = 1;
 }
 }
 
@@ -460,7 +467,7 @@ void inventoryMenu()
     slotDesign("Exit",5);
     Console.ForegroundColor = ConsoleColor.DarkGray;
     Console.WriteLine("'=────────────────────='");
-
+    Karma();
     ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
     if (pressed.Key == ConsoleKey.Enter)
     {
@@ -701,7 +708,7 @@ int dice(int quantity,int maximo, int bns) // random number generator syle RPG C
     return (result+bns); // return all dices values
 }
 
-void soul(int actual, string who) // shorter heart fill
+string soul(int actual, string who) // shorter heart fill
 {
     if (who == "Monster") // if is monster hearts
     {
@@ -721,6 +728,7 @@ void soul(int actual, string who) // shorter heart fill
         }
         playerhpbar = playerhpbar.PadRight(heartLength,'♡'); // fill with void hearts
     }
+    return playerhpbar;
 }
 
 void bar(int now, int max, string who) // Heart Bar
@@ -815,7 +823,7 @@ if (secretEcounter == false){
 switch (stage)
 {
     case 1:
-    enemy=("Lobo Cinzento",3,3,1);
+    enemy=("Lobo Cinzento",3,3,1,0,0,0);
     narrador=(
         $"{enemy.name} ataca ferozamente!",
         $"{enemy.name} late ferozamente!",
@@ -824,7 +832,7 @@ switch (stage)
     );
     break;
     case 2:
-    enemy=("Lobo Branco",3,3,1);
+    enemy=("Lobo Branco",3,3,1,0,0,0);
     narrador=(
         $"{enemy.name} ataca calmamente.",
         $"{enemy.name} late calmamente.",
@@ -833,7 +841,7 @@ switch (stage)
     );
     break;
     case 3:
-    enemy=("Goblin",5,4,2);
+    enemy=("Goblin",5,4,2,0,0,0);
     narrador=(
         $"{enemy.name} te encara!",
         $"{enemy.name} começa a saltitar!",
@@ -842,7 +850,7 @@ switch (stage)
     );
     break;
     case 4:
-    enemy=("Orc Vesgo",5,5,4);
+    enemy=("Orc Vesgo",5,5,4,0,0,0);
     narrador=(
         $"{enemy.name} acabou de intimidar até sua alma.",
         $"{enemy.name} tentou enxergar você.\n✶ Mas falha miseravelmente.",
@@ -851,7 +859,7 @@ switch (stage)
     );
     break;
     case 5:
-    enemy=("Orc Barbudo",5,5,4);
+    enemy=("Orc Barbudo",5,5,4,0,0,0);
     narrador=(
         $"{enemy.name} demonstra sua barba!",
         $"{enemy.name} reflete a luz!",
@@ -860,7 +868,7 @@ switch (stage)
     );
     break;
     case 6:
-    enemy=("Zumbi Manco",6,7,5);
+    enemy=("Zumbi Manco",6,7,5,0,0,0);
     narrador=(
         $"{enemy.name} corre rapidamente em sua direção!",
         $"{enemy.name} ele questiona o sentido da vida.",
@@ -869,7 +877,7 @@ switch (stage)
     );
     break;
     case 7:
-    enemy=("Zumbi Balofo",6,7,5);
+    enemy=("Zumbi Balofo",6,7,5,0,0,0);
     narrador=(
         $"urg.\n (Não consigo respirar!)",
         $"{enemy.name} está fedendo. . .",
@@ -878,7 +886,7 @@ switch (stage)
     );
     break;
     case 8:
-    enemy=("Troll",8,7,7);
+    enemy=("Troll",8,7,7,0,0,0);
     narrador=(
         $"{enemy.name} fez uma TROLLagem em você!",
         $"{enemy.name} alegremente.\n✶ Começa a sorrir.",
@@ -887,7 +895,7 @@ switch (stage)
     );
     break;
     case 9:
-    enemy=("Ogro",8,9,7);
+    enemy=("Ogro",8,9,7,0,0,0);
     narrador=(
         $"{enemy.name} senta-se.",
         $"{enemy.name} balança sua arma.",
@@ -896,7 +904,7 @@ switch (stage)
     );
     break;
     case 10:
-    enemy=("Ogro Furioso",10,9,10);
+    enemy=("Ogro Furioso",10,9,10,0,0,0);
     narrador=(
         $"{enemy.name} lembrou-se do motivo para lutar!",
         $"{enemy.name} começa contemplar sua dor!",
@@ -905,7 +913,7 @@ switch (stage)
     );
     break;
     case 11:
-    enemy=("Necromante Maligno",12,12,12);
+    enemy=("Necromante Maligno",12,12,12,0,0,0);
     narrador=(
         $"O ambiente começa a ficar mais tenso. . .",
         $"O cemitério.\n✶ Os ventos.\n* Te incomodam. . .",
@@ -923,12 +931,21 @@ else if (secretEcounter == true)
     switch (secret)
     {
     case 0:
-    enemy=($"{you.name}?",you.hp,you.at,you.lv);
+    enemy=($"{you.name}?",you.hp,you.at,you.lv,you.lu,0,0);
     narrador=(
         $"O cenário está vazio. . .\n✶ Te deixa bastante confuso e desconfortavel. . .",
         $". . . ?",
         $"Sua mente esvazia-se. . .\n✶ Conforme a batalha procede. . .",
         $"Sua Determinação. . .\n✶ Sua Criação. . .\n✶ Vai colocar um Fim. . ."
+    );
+    break;
+    case 1:
+    enemy=("Sans",1,1,1,30,5,0);
+    narrador=(
+        $"Você sente seus pecados \nrastejando em suas costas.",
+        $"Você sente que vai \nter um tempo RUIM.",
+        $"Você escuta sons de ossos \nquebrando no corredor.",
+        $"Você se enche de KARMA."
     );
     break;
     default:
@@ -938,6 +955,7 @@ else if (secretEcounter == true)
 
 // monster stats update
 hp = enemy.hp;
+st = enemy.st;
 xp = xpMonsterMath();
 g = gMonster();
 }
@@ -947,7 +965,14 @@ void counterCheck() // when you defend check if you counter the attack or not
     Console.ForegroundColor = ConsoleColor.Cyan;
     if (atk_Test >= you.at)
     {
+    if (st > 0)
+    {
+    st -= 1;
+    }
+    else
+    {
     hp -= (atk_dmg-1);
+    }
     textDialog($"➹ \"{you.name}\" Contra-ataca!\n",25);
     dmgSound("Player");
     Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1065,6 +1090,84 @@ void status_math() // taken or does damage math
         def_dmg = 3;
     }
 }
+
+void attackTest(string from)
+{
+    if (from == "attack")
+    {
+        if (atk_Test > def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            if (st > 0)
+            {
+            st -= 1;
+            }
+            else
+            {
+            hp -= atk_dmg;
+            }
+            textDialog($"➹ \"{you.name}\" Ataca!\n",25);
+            dmgSound("Player");
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            textDialog($"♡ {enemy.name} perdeu {atk_dmg} HP\n",12);
+            dmgSound("");
+        }
+        else if (atk_Test < def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            player_hp -= def_dmg;
+            player_kr += enemy.kr;
+            textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
+            dmgSound("Monster");
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            textDialog($"♡ \"{you.name}\" perdeu {def_dmg} HP\n",12);
+            dmgSound("");
+        }
+        else if (atk_Test == def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            textDialog("➹ Ambos erram o Ataque!\n",25);
+            Console.Beep(850,1450);
+        }     
+    }
+    else if (from == "defend")
+    {
+        if (def_Test != atk_Test)
+        {
+            counterCheck();
+        }
+        else if (def_Test == atk_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            textDialog("➹ Ambos erram o Ataque!\n",25);
+            Console.Beep(850,1450);
+        }
+    }
+    else if (from == "run")
+    {
+        if (atk_Test <= def_Test)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            player_hp -= def_dmg;
+            player_kr += enemy.kr;
+            textDialog($"➹ {enemy.name} Ataca!\n",25);
+            dmgSound("Monster");
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            textDialog($"♡ \"{you.name}\" perdeu {def_dmg} HP\n",12);
+            dmgSound("");
+        }
+    }
+}
+
+void Karma()
+{
+    if (player_kr > 0 && player_hp > 1)
+    {
+    player_kr -= 1;
+    player_hp -= 1;
+    }
+}
+
 void loop() // actions: [A] attack, [D] defend, [S] luck or [I] item
 {
 if (firstEncounter == false)
@@ -1106,6 +1209,7 @@ Console.ForegroundColor = ConsoleColor.DarkGray;
 Console.WriteLine("│ Ⓡ un                   │");
 Console.ForegroundColor = ConsoleColor.White;
 Console.WriteLine("╚────────────────────────╝"); // end of action box
+Karma();
 action = Console.ReadLine()!;
 if (action.Trim() == "") // prevent of break code when used substring();
 {
@@ -1154,32 +1258,7 @@ if (action.Trim().ToLower().Substring(0,1) == "a") // attack action
         luck_mode = "";
         atk_Test = you.at + dice(2,6,0);
         def_Test = enemy.at + dice(2,6,0);
-        if (atk_Test > def_Test)
-        {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            hp -= atk_dmg;
-            textDialog($"➹ \"{you.name}\" Ataca!\n",25);
-            dmgSound("Player");
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            textDialog($"♡ {enemy.name} perdeu {atk_dmg} HP\n",12);
-            dmgSound("");
-        }
-        else if (atk_Test < def_Test)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            player_hp -= def_dmg;
-            textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
-            dmgSound("Monster");
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            textDialog($"♡ \"{you.name}\" perdeu {def_dmg} HP\n",12);
-            dmgSound("");
-        }
-        else if (atk_Test == def_Test)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            textDialog("➹ Ambos erram o Ataque!\n",25);
-            Console.Beep(850,1450);
-        }
+        attackTest("attack");
         morte();
         loaded();
     }
@@ -1192,16 +1271,7 @@ else if (action.Trim().ToLower().Substring(0,1) == "d") // defend action
         luck_mode = "";
         def_Test = you.hp + dice(2,6,0);
         atk_Test = enemy.hp + dice(2,6,0);
-        if (def_Test != atk_Test)
-        {
-            counterCheck();
-        }
-        else if (def_Test == atk_Test)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            textDialog("➹ Ambos erram o Ataque!\n",25);
-            Console.Beep(850,1450);
-        }
+        attackTest("defend");
         morte();
         loaded();
     }
@@ -1248,20 +1318,11 @@ else if (action.Trim().ToLower().Substring(0,1) == "r") // item action
         {
             Console.ForegroundColor = ConsoleColor.Gray;
             textDialog($"Você falha em fugir do {enemy.name}. . .\n",25);
-             status_math();
+            status_math();
             luck_mode = "";
             atk_Test = you.at + dice(1,6,0);
             def_Test = enemy.at + dice(2,6,0);
-            if (atk_Test <= def_Test)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                player_hp -= def_dmg;
-                textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
-                dmgSound("Monster");
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                textDialog($"♡ \"{you.name}\" perdeu {def_dmg} HP\n",12);
-                dmgSound("");
-            }
+            attackTest("run");
         }
         loaded();
         morte();
@@ -1293,6 +1354,8 @@ Console.ForegroundColor = ConsoleColor.Green;
 Console.Write($" HP {hpbar} {hp.ToString().PadLeft(2,'0')}/{enemy.hp.ToString().PadLeft(2,'0')}");
 Console.ForegroundColor = ConsoleColor.DarkRed;
 Console.Write($" AT {enemy.at}➶ ");
+Console.ForegroundColor = ConsoleColor.DarkCyan;
+Console.Write($" ST {enemy.st}? ");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
 Console.WriteLine($" LU ?✤\n");
 // --------------------------------------Player-----------------------------------------
@@ -1310,7 +1373,24 @@ randomBar();
 Console.ForegroundColor = ConsoleColor.DarkYellow;
 Console.WriteLine($"{gold} Gold");
 Console.ForegroundColor = ConsoleColor.Green;
-Console.Write($" HP {playerhpbar} {player_hp.ToString().PadLeft(2,'0')}/{you.hp.ToString().PadLeft(2,'0')}");
+Console.Write($" HP ");
+for (int i = 0; i < playerhpbar.Length; i++)
+{
+    if ((player_kr/playerhpbar.Length) < i && playerhpbar[i] == '♥')
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+    }
+    else if (playerhpbar[i] == '♥')
+    {
+        Console.ForegroundColor = ConsoleColor.DarkMagenta;
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+    }
+    Console.Write(playerhpbar[i]);
+}
+Console.Write($" {player_hp.ToString().PadLeft(2,'0')}/{you.hp.ToString().PadLeft(2,'0')}");
 Console.ForegroundColor = ConsoleColor.DarkRed;
 Console.Write($" AT {you.at}➶ ");
 Console.ForegroundColor = ConsoleColor.DarkGreen;
