@@ -1334,6 +1334,7 @@ else if (action.Trim().ToLower().Substring(0,1) == "r") // item action
 {
     if (hp > 0)
     {
+        luck_mode = "";
         int player_run = dice(2,6,player_hp);
         int enemy_run = dice(2,6,hp);
         for (int i = 0; i < 4; i++)
@@ -1346,8 +1347,16 @@ else if (action.Trim().ToLower().Substring(0,1) == "r") // item action
             textDialog($"Você conseguiu fugir do {enemy.name}!\n",25);
             if (stage > 1 && secretEcounter == false && stage < finalStage)
             {
-            int choosing = dice(1,2,0);
-            if (choosing%2 == 0)
+            int choosing = dice(1,100,0);
+            if (luck_mode == "lucky")
+            {
+                choosing -= 75;
+            }
+            else if (luck_mode == "unlucky")
+            {
+                choosing += 25;
+            }
+            if (choosing < 50)
             {
             stage -= 2;
             }
