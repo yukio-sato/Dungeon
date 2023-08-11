@@ -20,9 +20,10 @@ var inventory=(slot1: "─", slot2: "─", slot3: "─", slot4: "─"); // Playe
 var foodId=(food1: 0, food2: 0, food3: 0, food4: 0); // Player Food ID
 var shopMenu=(option1: 0, option2: 0, option3: 0, option4: 0); // Shop placeholder slots
 
-int stage = 0, finalStage = 11, // stage settings
+int stage = 0, finalStage = 15, // stage settings
 rolled = 1, result, // dice placeholder
 encounter, secret=0, // monster random encounter
+atkBns = 0, // attack bonus when realstatus actual from monster
 hp, // health actual from monster
 st, // stamina actual from monster
 xp, // xp actual from monster
@@ -58,15 +59,16 @@ else
 {
 stage++;
 secretEcounter = false;
-if (encounter <= 5) // chance for YOU?
-{
-    secretEcounter = true;
-    secret = 0;
-}
-else if (encounter <= 15) // chance for Sans
+
+if (encounter <= 5) // chance for Sans
 {
     secretEcounter = true;
     secret = 1;
+}
+else if (encounter <= 10) // chance for YOU?
+{
+    secretEcounter = true;
+    secret = 0;
 }
 }
 }
@@ -414,7 +416,7 @@ void foodHeal()
         onInventory = false;
     }
     }
-    else if ((player_hp + item.heal) < you.hp)
+    else if ((player_hp + item.heal) > player_hp && (player_hp + item.heal) < you.hp)
     {
     textDialog($"Recuperou {item.heal} HP!\n",25);
     player_hp += item.heal;
@@ -604,7 +606,7 @@ case 5:
 item=("Café",20,1,you.hp,0,0,"✶ Você bebe o café.\n✶ Você sente-se revigorado!",10);
 break;
 case 6:
-item=("Cereal",8,3,dice(1,you.hp,-1),0,-1,"✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!",75);
+item=("Cereal",8,3,dice(1,you.hp,0),0,-1,"✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!",75);
 break;
 default:
 item=("",0,0,0,0,0,"",100);
@@ -623,10 +625,10 @@ void Levelviolence() // love for every kill you do
         textDialog($"\"{you.name}\" subiu de LV {you.lv-1} > {you.lv}!\n",25);
         if (you.lv % 4 == 0)
         {
-        player_hp += 1;
-        you.hp += 1;
+        player_hp += 4;
+        you.hp += 4;
         Console.ForegroundColor = ConsoleColor.Green;
-        textDialog($"Aumentou 1 de HP!\n",25);
+        textDialog($"Aumentou 4 de HP!\n",25);
         }
         else
         {
@@ -644,7 +646,7 @@ int xpMonsterMath() // xp math with monster lv when kill
 }
 int gMonster() // g with monster lv when kill
 {
-    int golden = dice(1,10,0) + (3*(enemy.lv - 1));
+    int golden = dice(1,10,enemy.lv) + (3*(enemy.lv - 1));
     return golden;
 }
 
@@ -823,6 +825,7 @@ loaded();
 void updt()
 {
 realStatus = false;
+atkBns = 0;
 if (secretEcounter == false){
 switch (stage)
 {
@@ -925,6 +928,42 @@ switch (stage)
         $"Você só queria terminar essa Masmorra. . ."
     );
     break;
+    case 12:
+    enemy=("Zumbi Mutante",15,13,14,0,0,0);
+    narrador=(
+        $"{enemy.name} bloqueia seu caminho.",
+        $"Ele se movimenta rapidamente. . .",
+        $"Seus ataques não demonstram efeito. . .",
+        $"Você ve seu corpo deformando com a mutação. . ."
+    );
+    break;
+    case 13:
+    enemy=("Rei Javali",20,10,12,0,0,0);
+    narrador=(
+        $"{enemy.name} rosna ferozamente.",
+        $"{enemy.name} grita por reforços.\n* Mas ninguém veio.",
+        $"{enemy.name} prepara um ataque demolidor.",
+        $"{enemy.name} levanta-se após a destruição."
+    );
+    break;
+    case 14:
+    enemy=("Enxame de Parasitas",5,10,15,0,5,0);
+    narrador=(
+        $"Os parasitas te percebem!",
+        $"Atento: parasitas tem veneno em suas mandíbulas.",
+        $"Parece que os parasitas são infinitos. . .",
+        $"Por que eles estão ai?"
+    );
+    break;
+    case 15:
+    enemy=("Ceifador",18,18,18,2,0,0);
+    narrador=(
+        $"{you.name} presencia as espirais do tempo. . .",
+        $"{enemy.name} escorre cada vez mais lodo.",
+        $"A sensação é a mesma quando estava próximo da morte.",
+        $"Tudo realmente necessita de um fim?"
+    );
+    break;
     default:
     break;
 }
@@ -944,7 +983,7 @@ else if (secretEcounter == true)
     );
     break;
     case 1:
-    enemy=("Sans",1,1,1,15,you.lv+1,2);
+    enemy=("Sans",1,1,1,15,2,2);
     narrador=(
         $"Você sente seus pecados \nrastejando em suas costas.",
         $"Você sente que vai \nter um tempo RUIM.",
@@ -952,9 +991,10 @@ else if (secretEcounter == true)
         $"Você se enche de KARMA."
     );
     realStatus = true;
+    atkBns = -3;
     break;
     case 2:
-    enemy=("Sans",1,1,1,15,you.lv+1,0);
+    enemy=("Sans",1,1,1,15,3,0);
     narrador=(
         $"A verdadeira batalha começa.",
         $"Os ataques se intensificam.",
@@ -962,6 +1002,7 @@ else if (secretEcounter == true)
         $"O espaço-tempo indo \npara lá e para cá."
     );
     realStatus = true;
+    atkBns = 3;
     break;
     default:
     break;
@@ -972,13 +1013,44 @@ else if (secretEcounter == true)
 hp = enemy.hp;
 st = enemy.st;
 xp = xpMonsterMath();
+if (secretEcounter == true)
+{
+xp = xp*2;  
+}
 g = gMonster();
+if (secretEcounter == true)
+{
+g = g*2;  
+}
+}
+
+void playerDMG(string action)
+{
+if (action == "attack")
+{
+    player_hp -= def_dmg;
+    player_kr += enemy.kr;
+}
+else if (action == "defend")
+{
+    player_hp -= (def_dmg-1);
+    player_kr += enemy.kr;   
+}
 }
 
 void counterCheck() // when you defend check if you counter the attack or not
 {
     Console.ForegroundColor = ConsoleColor.Cyan;
-    if (atk_Test >= you.at)
+    if (you.at < (enemy.at+atkBns) || def_Test <  atk_Test)
+    {
+    playerDMG("defend");
+    textDialog($"➹ \"{you.name}\" Bloqueiou!\n",25);
+    dmgSound("Monster");
+    Console.ForegroundColor = ConsoleColor.DarkRed;
+    textDialog($"♡ \"{you.name}\" perdeu {def_dmg-1} HP\n",12);
+    dmgSound("");
+    }
+    else if (you.at > (enemy.at+atkBns) || def_Test > atk_Test)
     {
     textDialog($"➹ \"{you.name}\" Contra-ataca!\n",25);
     dmgSound("Player");
@@ -1003,16 +1075,6 @@ void counterCheck() // when you defend check if you counter the attack or not
     textDialog($"♡ {enemy.name} perdeu {atk_dmg-1} HP\n",12);
     }
     }
-    dmgSound("");
-    }
-    else if (atk_Test < you.at)
-    {
-    player_hp -= (def_dmg-1);
-    player_kr += enemy.kr;
-    textDialog($"➹ \"{you.name}\" Bloqueiou!\n",25);
-    dmgSound("Monster");
-    Console.ForegroundColor = ConsoleColor.DarkRed;
-    textDialog($"♡ \"{you.name}\" perdeu {def_dmg-1} HP\n",12);
     dmgSound("");
     }
 }
@@ -1144,8 +1206,7 @@ void attackTest(string from)
         else if (atk_Test < def_Test)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            player_hp -= def_dmg;
-            player_kr += enemy.kr;
+            playerDMG("attack");
             textDialog($"➹ {enemy.name} Contra-ataca!\n",25);
             dmgSound("Monster");
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1177,8 +1238,7 @@ void attackTest(string from)
         if (atk_Test <= def_Test)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            player_hp -= def_dmg;
-            player_kr += enemy.kr;
+            playerDMG("attack");
             textDialog($"➹ {enemy.name} Ataca!\n",25);
             dmgSound("Monster");
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1294,7 +1354,7 @@ if (action.Trim().ToLower().Substring(0,1) == "a") // attack action
         }
         else if (realStatus == true)
         {
-        def_Test = you.at + dice(2,6,0);
+        def_Test = you.at + dice(2,6,atkBns);
         }
         attackTest("attack");
         morte();
@@ -1314,7 +1374,7 @@ else if (action.Trim().ToLower().Substring(0,1) == "d") // defend action
         }
         else if (realStatus == true)
         {
-        def_Test = you.hp + dice(2,6,0);
+        atk_Test = you.hp + dice(2,6,atkBns);
         }
         attackTest("defend");
         morte();
@@ -1381,7 +1441,7 @@ else if (action.Trim().ToLower().Substring(0,1) == "r") // item action
             }
             else if (realStatus == true)
             {
-            def_Test = you.at + dice(2,6,0);
+            def_Test = you.at + dice(2,6,atkBns);
             }
             attackTest("run");
         }
@@ -1493,7 +1553,7 @@ if (hp <= 0 && stage < finalStage) // stage/floor increase when monster die
     shopSlot4 = 0;
     for (int i = 0; i <= foodLength; i++)
     {
-        int foodDice = dice(1,foodLength,-1);
+        int foodDice = dice(1,foodLength,0);
         shop(foodDice);
         int foodChance = dice(1,100,0);  
         if (foodChance <= item.chance)
