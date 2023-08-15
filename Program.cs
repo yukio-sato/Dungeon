@@ -591,22 +591,22 @@ void shop(int x)
 switch (x) // [1] Item Name, [2] Cost, [3] Max amount, [4] Heal, [5] Attack, [6] Luck, [7] Description, [8] Shop Chance
 {
 case 1:
-item=("Durex",5,5,3,0,0,"✶ Você remenda seus ferimentos.\n✶ Parabéns por não morrer até agora!",50);
+item=("Durex",5,5,3,0,0,"✶ Você remenda seus ferimentos.\n✶ Parabéns por não morrer até agora!",70);
 break;
 case 2:
-item=("Veneno",3,1,-6,-1,10,"✶ Você decide tomar o Veneno. . .\n✶ Alguma coisa não caiu bem.",20);
+item=("Veneno",3,1,-6,0,10,"✶ Você decide tomar o Veneno. . .\n✶ Alguma coisa não caiu bem.",66);
 break;
 case 3:
-item=("Vita╴",30,2,4,4,-2,"✶ Você espera a luz do Sol!\n✶ Vitamina A deixou você refrescado!",35);
+item=("Vita╴",30,2,4,4,-2,"✶ Você espera a luz do Sol!\n✶ Vitamina A deixou você refrescado!",55);
 break;
 case 4:
 item=("Trevo",12,4,0,0,4,"✶ Bem me quer, Mal me quer.\n✶ Bem me quer, Mal me quer. . .",44);
 break;
 case 5:
-item=("Café",20,1,you.hp,0,0,"✶ Você bebe o café.\n✶ Você sente-se revigorado!",10);
+item=("Café",20,1,you.hp,0,0,"✶ Você bebe o café.\n✶ Você sente-se revigorado!",25);
 break;
 case 6:
-item=("Cereal",8,3,dice(1,you.hp,0),0,-1,"✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!",75);
+item=("Cereal",8,3,dice(1,you.hp,0),0,-1,"✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!",85);
 break;
 default:
 item=("",0,0,0,0,0,"",100);
@@ -991,7 +991,7 @@ else if (secretEcounter == true)
         $"Você se enche de KARMA."
     );
     realStatus = true;
-    atkBns = -3;
+    atkBns = -2;
     break;
     case 2:
     enemy=("Sans",1,1,1,15,3,0);
@@ -1002,7 +1002,7 @@ else if (secretEcounter == true)
         $"O espaço-tempo indo \npara lá e para cá."
     );
     realStatus = true;
-    atkBns = 3;
+    atkBns = 1;
     break;
     default:
     break;
@@ -1056,7 +1056,7 @@ void counterCheck() // when you defend check if you counter the attack or not
     dmgSound("Player");
     if (st > 0)
     {
-    st -= 1;
+    st -= atk_dmg-1;
     Console.ForegroundColor = ConsoleColor.Gray;
     textDialog($"➹ {enemy.name} esquivou!\n",12);
     }
@@ -1064,7 +1064,7 @@ void counterCheck() // when you defend check if you counter the attack or not
     {
     if (st > 0)
     {
-    st -= 1;
+    st -= atk_dmg-1;
     Console.ForegroundColor = ConsoleColor.Gray;
     textDialog($"➹ {enemy.name} esquivou!\n",12);
     }
@@ -1191,7 +1191,7 @@ void attackTest(string from)
             dmgSound("Player");
             if (st > 0)
             {
-            st -= 1;
+            st -= atk_dmg;
             Console.ForegroundColor = ConsoleColor.Gray;
             textDialog($"➹ {enemy.name} esquivou!\n",12);
             }
