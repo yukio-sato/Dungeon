@@ -11,7 +11,7 @@ void OpenFolder(string folderPath, string appName){
     string _path = folderPath+appName;
     startInfo.Arguments = string.Format("/C start {0}", _path);
     process.StartInfo = startInfo;
-    process.Start();
+    //process.Start();
 }
 
 #pragma warning disable CA1416 // beep warning disabler
@@ -58,7 +58,7 @@ luck_Test = 0, atk_Test = 0, def_Test = 0, // player/enemy tests
 atk_dmg = 0, def_dmg = 0, // damage player/enemy for atk and def
 next = 25, // exp modify for next love
 xpMath = 10, // math of next exp for love
-gold = 550; // player gold
+gold = 0; // player gold
 
 int stage = 0, finalStage = 15, // stage settings
 rolled = 1, result, // dice placeholder
