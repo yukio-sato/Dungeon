@@ -1,5 +1,5 @@
 # Dungeon
-Simulador de "Fighting Fantasy", onde você teve derrotar todos os adversários até chegar no fim da "Masmorra".
+Simulator de "Fighting Fantasy".
 ___
 ## 🎮 How to play! 🎮
 - First you need to have a installed [.NET SDK](https://dotnet.microsoft.com/download) to run C# in Visual Studio or in terminal itself.
