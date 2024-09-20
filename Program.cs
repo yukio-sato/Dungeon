@@ -11,7 +11,7 @@ void OpenFolder(string folderPath, string appName){
     string _path = folderPath+appName;
     startInfo.Arguments = string.Format("/C start {0}", _path);
     process.StartInfo = startInfo;
-    //process.Start();
+    process.Start();
 }
 
 #pragma warning disable CA1416 // beep warning disabler
