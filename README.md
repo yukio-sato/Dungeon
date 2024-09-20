@@ -1,5 +1,5 @@
 # Dungeon
-Simulator de "Fighting Fantasy".
+Simulator of "Fighting Fantasy" on C#.
 ___
 ## 🎮 How to play! 🎮
 - First you need to have a installed [.NET SDK](https://dotnet.microsoft.com/download) to run C# in Visual Studio or in terminal itself.
