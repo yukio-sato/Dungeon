@@ -3,17 +3,6 @@ using System.IO;
 using System.Diagnostics;
 Console.OutputEncoding = System.Text.Encoding.UTF8; // emoji/ special character fix
 
-void OpenFolder(string folderPath, string appName){
-    System.Diagnostics.Process process = new System.Diagnostics.Process();
-    System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
-    startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-    startInfo.FileName = "cmd.exe";
-    string _path = folderPath+appName;
-    startInfo.Arguments = string.Format("/C start {0}", _path);
-    process.StartInfo = startInfo;
-    process.Start();
-}
-
 #pragma warning disable CA1416 // beep warning disabler
 string hpbar = "", // Visual hp bar string
 playerhpbar = "", // Visual hp bar string
@@ -40,8 +29,10 @@ bool firstEncounter = true, // first interact for monster encounter
 onShop = false, // shop detector
 onInventory = false, // inventory detector
 realStatus = false, // hide real Status
-secretMode = true, // Enables Secret Encounters
+secretMode = true, // Enables Secret Encounters Aka Hardmode
 secretEcounter = false, // Enabled when you are encoutering a Secret
+soundEnable = true, // Effect Sound enabled
+musicEnable = true, // Enable music battle
 anti_spam = false; // When you press any key just jumping dialogs
 
 
@@ -286,22 +277,61 @@ void answerConfig(){
     }
 }
 
+void soundBlock(){
+    Console.Clear();
+    textDialog("Habilitar Som? [S/N]\n",-9,ConsoleColor.Cyan);
+    Console.ForegroundColor = ConsoleColor.White;
+    string answer = Console.ReadKey().KeyChar.ToString().ToLower();
+    if (answer == "n"){
+        soundEnable = false;
+    }
+    else if (answer == "s"){
+        soundEnable = true;
+    } else{
+        soundBlock();
+    }
+}
+
+void musicBlock(){
+    Console.Clear();
+    textDialog("Habilitar Música? [S/N]\n",-9,ConsoleColor.Yellow);
+    Console.ForegroundColor = ConsoleColor.White;
+    string answer = Console.ReadKey().KeyChar.ToString().ToLower();
+    if (answer == "n"){
+        musicEnable = false;
+    }
+    else if (answer == "s"){
+        musicEnable = true;
+    } else{
+        musicBlock();
+    }
+}
+
 void hardMode(){
     Console.Clear();
     textDialog("Habilitar HardMode [S/N]\n",-9,ConsoleColor.DarkRed);
     Console.ForegroundColor = ConsoleColor.White;
-    string answer = Console.ReadLine()!;
-    if (answer.Length > 0){
-        if (answer.Substring(0,1).ToLower() == "n"){
-            secretMode = false;
-        }
-        else if (answer.Substring(0,1).ToLower() == "s"){
-            secretMode = true;
-        } else{
-            hardMode();
-        }
+    string answer = Console.ReadKey().KeyChar.ToString().ToLower();
+    if (answer == "n"){
+        secretMode = false;
+    }
+    else if (answer == "s"){
+        secretMode = true;
     } else{
         hardMode();
+    }
+}
+
+void OpenFolder(string folderPath, string appName){
+    if (musicEnable == true){
+        System.Diagnostics.Process process = new System.Diagnostics.Process();
+        System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+        startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+        startInfo.FileName = "cmd.exe";
+        string _path = folderPath+appName;
+        startInfo.Arguments = string.Format("/C start {0}", _path);
+        process.StartInfo = startInfo;
+        process.Start();
     }
 }
 
@@ -448,8 +478,7 @@ void choice(){
 void secretEncounter(){
     if (secretMode){ // enable secret encounter in hardmode
         encounter = dice(1,100,0);
-    }
-    else{
+    } else{ // normal mode without secrets!
         encounter = 100;
     }
 
@@ -458,6 +487,9 @@ void secretEncounter(){
         secret = enemy[6];
         if (secret == 2){
             Console.Clear();
+            textDialog(startNm.ToString(),12,ConsoleColor.White);
+            textDialog("Sans",12,ConsoleColor.Yellow);
+            textDialog(endNm.ToString()+": ...Nós dois estamos cansados, abaixa essa arma e talvez podemos repensar sobre isto?\n",12,ConsoleColor.White);
             textDialog("✶ ",12,ConsoleColor.White);
             textDialog("Sans",12,ConsoleColor.Yellow);
             textDialog(" está de ",12,ConsoleColor.White);
@@ -468,18 +500,19 @@ void secretEncounter(){
             ConsoleKeyInfo pressed = Console.ReadKey()!; // detect what keybind has clicked (note: shift + any key dont break) + new var
             Console.Clear();
             if (pressed.Key == ConsoleKey.S){
-                textDialog("✶ ",12,ConsoleColor.White);
-                textDialog("Sans",12,ConsoleColor.Yellow);
-                textDialog(" trolla você e ataca furtivamente\n",12,ConsoleColor.White);
-                player_kr = you[0];
-                loaded();
-                
-            }else{
                 textDialog(startNm.ToString(),12,ConsoleColor.White);
                 textDialog("Sans",12,ConsoleColor.Yellow);
-                textDialog(endNm.ToString()+": pelo jeito nunca fomos amigos.\n",12,ConsoleColor.White);
-                loaded();
+                textDialog(endNm.ToString()+": caso você realmente esteja me poupando, nunca mais volte aqui.\n",12,ConsoleColor.White);
+                textDialog("✶ ",12,ConsoleColor.White);
+                textDialog("Sans",12,ConsoleColor.Yellow);
+                textDialog(" aproveita a abertura recebida pela ação e o ataca pela costas...\n",12,ConsoleColor.White);
+                player_kr = you[0];
+            } else{
+                textDialog(startNm.ToString(),12,ConsoleColor.White);
+                textDialog("Sans",12,ConsoleColor.Yellow);
+                textDialog(endNm.ToString()+": pelo jeito você prefere do jeito difícil.\n",12,ConsoleColor.White);
             }
+            loaded();
         }
     }
     else{
@@ -729,19 +762,19 @@ void foodHeal(){
     textDialog($"Utilizou {itemNM}!\n",25,ConsoleColor.Yellow);
     textDialog(itemDesc+"\n",25,ConsoleColor.White);
     
-    double healed = (item[2]-player_bl);
+    double healed = item[2]-player_bl;
     if (healed < 0){
         healed = 0;
     }
 
-    player_bl = Math.Round(player_bl-item[2]);
+    player_bl = Math.Round(player_bl-item[2],1);
     if (player_bl < 0 && item[2] > 0){
         player_bl = 0;
     }
 
     if ((player_hp + item[2]) < player_hp){
         textDialog($"Perdeu {item[2]} HP!\n",25,ConsoleColor.Red);
-        player_hp = Math.Round(player_hp+item[2]);
+        player_hp = Math.Round(player_hp+item[2],1);
         if (player_hp <= 0){
             Console.Clear();
             onInventory = false;
@@ -749,7 +782,7 @@ void foodHeal(){
     }
     else if ((player_hp + healed) > player_hp && (player_hp + healed) < you[0]){
         textDialog($"Recuperou {healed} HP!\n",25,ConsoleColor.Green);
-        player_hp = Math.Round(player_hp+healed);
+        player_hp = Math.Round(player_hp+healed,1);
     }
     else if ((player_hp + healed) >= you[0] && you[0] != player_hp){
         textDialog($"Maximixou seu HP!\n",25,ConsoleColor.Green);
@@ -761,14 +794,14 @@ void foodHeal(){
     }else if ((you[1] + item[3]) > you[1]){
         textDialog($"Ganhou {item[3]} AT!\n",25,ConsoleColor.DarkRed);
     }
-    you[1] = Math.Round(you[1]+item[3]);
+    you[1] = Math.Round(you[1]+item[3],1);
 
     if ((you[2] + item[4]) < you[2]){
         textDialog($"Perdeu {item[4]} LU!\n",25,ConsoleColor.Red);
     }else if ((you[2] + item[4]) > you[2]){
         textDialog($"Ganhou {item[4]} LU!\n",25,ConsoleColor.DarkGreen);
     }
-    you[2] = Math.Round(you[2]+item[4]);
+    you[2] = Math.Round(you[2]+item[4],1);
     loaded();
 }
 
@@ -876,7 +909,7 @@ void shop(int x){
             itemNM = "Veneno";
             itemDesc = "✶ Você decide tomar o Veneno. . .\n✶ Alguma coisa não caiu bem.";
             itemSelectDesc = "Você sabe do que isto é capaz. . .";
-            item=[3,1,Math.Round(Convert.ToDouble(you[0]/5))*-1,0,10,66];
+            item=[3,1,Math.Round(Convert.ToDouble(you[0]/5),1)*-1,0,10,66];
         break;
         case 3:
             itemNM = "Vitamina D";
@@ -900,7 +933,7 @@ void shop(int x){
             itemNM = "Cereal";
             itemDesc = "✶ Cada cereal tem seu sabor único.\n✶ Principalmente este!";
             itemSelectDesc = "\"Consome LU para recuperar aleatoriamente seu HP!\"";
-            item=[4,3,Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[0]),0))),0,0,85];
+            item=[4,3,Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[0]),0)),1),0,0,85];
         break;
         default:
             itemNM = "";
@@ -921,13 +954,13 @@ void shop(int x){
             itemNM = "X-Dead";
             itemDesc = "✶ De alguma maneira é reconfortante...\n✶ Mas a sensação acaba durante a queda para o chão.";
             itemSelectDesc = "Mais potente que o \"Veneno\" Original.";
-            item=[10,2,Math.Round(Convert.ToDouble(you[0]/4))*-1,Math.Round(Convert.ToDouble(you[0]/16)),-0.5,66];
+            item=[10,2,Math.Round(Convert.ToDouble(you[0]/4),1)*-1,Math.Round(Convert.ToDouble(you[0]/16),1),-0.5,66];
         break;
         case 3:
             itemNM = "HDeusO";
             itemDesc = "✶ Você bebe a água benta!\n✶ Deixando-o abençoado!";
             itemSelectDesc = "Realmente, para que uma água convecional, quando pode-se beber água benta!";
-            item=[99,1,Math.Round(Convert.ToDouble(you[0]*1.5)),5,5,20];
+            item=[99,1,Math.Round(Convert.ToDouble(you[0]*1.5),1),5,5,20];
         break;
         case 4:
             itemNM = "Rosa";
@@ -946,11 +979,11 @@ void shop(int x){
             itemDesc = "✶ Não existe um lugar para apostar!";
             itemSelectDesc = "Sim, isto é comprável. Contudo na aposta ganha-se tudo!";
             item=[
-                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(gold),0))),
+                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(gold),0)),1),
                 1,
-                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[0]/2),-Convert.ToInt32(Math.Round(you[0]/4))))),
-                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[1]),-Convert.ToInt32(Math.Round(you[1]/2))))),
-                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[2]),-Convert.ToInt32(Math.Round(you[2]/2))))),
+                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[0]/2),-Convert.ToInt32(Math.Round(you[0]/4)))),1),
+                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[1]),-Convert.ToInt32(Math.Round(you[1]/2)))),1),
+                Math.Round(Convert.ToDouble(dice(1,Convert.ToInt32(you[2]),-Convert.ToInt32(Math.Round(you[2]/2)))),1),
                 85
                 ];
         break;
@@ -994,30 +1027,34 @@ double gMonster(){ // g with monster lv when kill
 }
 
 void x_Beep(int x, int x2){ // last message/letter after die + beep
-    Console.Beep(x,x2);
+    if (soundEnable == true){
+        Console.Beep(x,x2);
+    }
     Console.Write("ˣ");
 }
 
 void dmgSound(string from){ // attack sound/effect
-    if (from == "" || from == null){ // nobody hit sound
-        for (int i = 0; i < 4; i++){
-            Console.Beep(800,125);
+    if (soundEnable == true){
+        if (from == "" || from == null){ // nobody hit sound
+            for (int i = 0; i < 4; i++){
+                Console.Beep(800,125);
+            }
+            Console.Beep(625,575);
         }
-        Console.Beep(625,575);
-    }
 
-    else if (from == "Monster"){ // monster hit sound
-        for (int i = 0; i < 4; i++){
-            Console.Beep(550,100);
+        else if (from == "Monster"){ // monster hit sound
+            for (int i = 0; i < 4; i++){
+                Console.Beep(550,100);
+            }
+            Console.Beep(550,450);
         }
-        Console.Beep(550,450);
-    }
 
-    else if (from == "Player"){ // player hit sound
-        for (int i = 0; i < 4; i++){
-            Console.Beep(600,100);
+        else if (from == "Player"){ // player hit sound
+            for (int i = 0; i < 4; i++){
+                Console.Beep(600,100);
+            }
+            Console.Beep(600,450);
         }
-        Console.Beep(600,450);
     }
 }
 
@@ -1027,7 +1064,11 @@ void textDialog(string txt, int cooldown, ConsoleColor rgb){ // write texts like
     if (dialogSpeed > 2 && (cooldown+dialogSpeed) > 2 && anti_spam == false){
         for (int i = 0; i < txt.Length; i++){ // how much length the txt have
             if (txt[i].ToString() != " " && txt[i].ToString() != ""){ // skip cooldown if the letter is blank or space
-                Console.Beep(1125,cooldown+dialogSpeed);
+                if (soundEnable == true){
+                    Console.Beep(1125,cooldown+dialogSpeed);
+                } else{
+                    Thread.Sleep(cooldown+dialogSpeed);
+                }
             }
             Console.Write(txt[i]); // write on 'i' position on txt
         }
@@ -1113,6 +1154,8 @@ void nameAsk(){ // arcade user name select/choose
 
 Console.Clear();
 choice();
+soundBlock();
+musicBlock();
 hardMode();
 
 // ------------------------------ where all begins! ----------------------
@@ -1566,7 +1609,7 @@ void coditionEffect(){
 
 void playerDMG(string action){ // math damage on player
     if (action == "attack"){
-        player_hp = Math.Round(player_hp-def_dmg);
+        player_hp = Math.Round(player_hp-def_dmg,1);
         aplierCondition(enemy[4],enemy[5]);
     }
     else if (action == "defend"){
@@ -1595,16 +1638,20 @@ void morte(){
         anti_spam = true;
         player_hp = 0;
         textDialog($"✝ \"{playerNM}\" caiu! ✝ ",25,ConsoleColor.DarkGray);
-        for (int i = 0; i < 4; i++){
-            Console.Beep(950-(i*50),900-(i*100));
+        if (soundEnable == true){
+            for (int i = 0; i < 4; i++){
+                Console.Beep(950-(i*50),900-(i*100));
+            }
+            Console.Beep(750,1000);
         }
-        Console.Beep(750,1000);
         textDialog(" . . . ➟\n",125,ConsoleColor.DarkGray);
         Console.ReadKey();
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.White;
-        for (int i = 0; i < 25; i++){
-            x_Beep(1900-(i*25),1800-(i*62));
+        if (soundEnable == true){
+            for (int i = 0; i < 25; i++){
+                x_Beep(1900-(i*25),1800-(i*62));
+            }
         }
     }
     if (hp <= 0 && enemy[6] <= 0){ // if monster is defeat
@@ -1623,28 +1670,34 @@ void morte(){
             textDialog($"\"{playerNM}\" ganhou {g} de Gold!\n",25,ConsoleColor.DarkYellow);
             textDialog($"\"{playerNM}\" ganhou {xp} de EXP!\n",25,ConsoleColor.White);
             Levelviolence();
-            for (int i = 0; i < 4; i++){
-                Console.Beep(900,120);
+            if (soundEnable == true){
+                for (int i = 0; i < 4; i++){
+                    Console.Beep(900,120);
+                }
+                Console.Beep(1100,270);
             }
-            Console.Beep(1100,270);
         }
         else if (secretEcounter == true){
             textDialog($"{monsterNM} foi apagado. . .\n", 105,ConsoleColor.DarkGray);
             textDialog($"\"{playerNM}\" substituiu, ganhando {g} de Gold.\n",25,ConsoleColor.Gray);
             textDialog($"Contudo, ganhou {xp} de EXP.\n",25,ConsoleColor.Gray);
             Levelviolence();
-            for (int i = 0; i < 4; i++){
-                Console.Beep(950-(i*50),900-(i*250));
+            if (soundEnable == true){
+                for (int i = 0; i < 4; i++){
+                    Console.Beep(950-(i*50),900-(i*250));
+                }
+                Console.Beep(750,1000);
             }
-            Console.Beep(750,1000);
         }
         loaded();
         if (stage >= finalStage){ // if you are on the last stage when enemy die (verify)
             textDialog($"❚ ❚ \"{playerNM}\" matou todos os monstros! ❚ ❚\n",25,ConsoleColor.Yellow);
-            Console.Beep(1250,400);
-            Console.Beep(750,400);
-            Console.Beep(1250,400);
-            Console.Beep(1550,600);
+            if (soundEnable == true){
+                Console.Beep(1250,400);
+                Console.Beep(750,400);
+                Console.Beep(1250,400);
+                Console.Beep(1550,600);
+            }
             Console.ResetColor();
         }
     }
@@ -1696,7 +1749,9 @@ void attackTest(string from){
         }
         else if (atk_Test == def_Test){
             textDialog("➹ Ambos erram o Ataque!\n",25,ConsoleColor.White);
-            Console.Beep(850,1450);
+            if (soundEnable == true){
+                Console.Beep(850,1450);
+            }
         }     
     }
     else if (from == "defend"){
@@ -1705,7 +1760,9 @@ void attackTest(string from){
         }
         else if (def_Test == atk_Test){
             textDialog("➹ Ambos erram o Ataque!\n",25,ConsoleColor.White);
-            Console.Beep(850,1450);
+            if (soundEnable == true){
+                Console.Beep(850,1450);
+            }
         }
     }
     else if (from == "run"){
@@ -1792,10 +1849,12 @@ void actingAction(){
                 if (luck_mode == ""){ // if you didn't tested you luck yet
                     textDialog($"✤ \"{playerNM}\" testou a Sorte!\n",25,ConsoleColor.DarkGreen);
                     luck_Test = dice(2,6,0);
-                    for (int i = 0; i < 4; i++){
-                        Console.Beep(800,100);
+                    if (soundEnable == true){
+                        for (int i = 0; i < 4; i++){
+                            Console.Beep(800,100);
+                        }
+                        Console.Beep(900,250);
                     }
-                    Console.Beep(900,250);
                     if (luck_Test <= you[2]){
                         textDialog("Sortudo\n",45,ConsoleColor.Green);
                         luck_mode = "lucky";
@@ -1834,8 +1893,10 @@ void actingAction(){
                 textDialog($"Você começou a correr!\n",25,ConsoleColor.White);
                 int player_run = dice(2,6,Convert.ToInt32(player_hp));
                 int enemy_run = dice(2,6,Convert.ToInt32(hp));
-                for (int i = 0; i < 4; i++){
-                    Console.Beep(850,450);
+                if (soundEnable == true){
+                    for (int i = 0; i < 4; i++){
+                        Console.Beep(850,450);
+                    }
                 }
                 if (player_run >= enemy_run){
                     textDialog($"Você conseguiu fugir do {monsterNM}!\n",25,ConsoleColor.Gray);
